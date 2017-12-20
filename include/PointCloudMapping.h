@@ -21,7 +21,8 @@
  #define POINTCLOUDMAPPING_H
  
  #include "System.h"
- 
+ #include <vector>
+
  #include <pcl/common/transforms.h>
  #include <pcl/point_types.h>
  #include <pcl/filters/voxel_grid.h>
@@ -43,10 +44,14 @@
      typedef pcl::PointXYZRGBA PointT;
      typedef pcl::PointCloud<PointT> PointCloud;
 
-     
-     
- 
-     PointCloudMapping( double resolution_ );
+     // constructor
+     PointCloudMapping(const string &strSettingPath);
+
+     // deconstructor
+     ~PointCloudMapping()
+     {
+
+     }
  
      void insertKeyFrame( KeyFrame* kf, cv::Mat& color, cv::Mat& depth );
      void shutdown();

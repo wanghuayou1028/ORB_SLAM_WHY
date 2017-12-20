@@ -17,25 +17,29 @@
  *
  */
 
- #include "PointCloudMapping.h"
- #include <KeyFrame.h>
- #include <opencv2/highgui/highgui.hpp>
+#include "PointCloudMapping.h"
+#include <KeyFrame.h>
+#include <opencv2/highgui/highgui.hpp>
 //  #include <pcl/visualization/cloud_viewer.h>
- #include <pcl/visualization/pcl_visualizer.h>
- #include <pcl/common/projection_matrix.h>
- #include <pcl/io/pcd_io.h>
- #include "Converter.h"
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/common/projection_matrix.h>
+#include <pcl/io/pcd_io.h>
+#include "Converter.h"
  
- #include <boost/make_shared.hpp>
+#include <boost/make_shared.hpp>
  
- PointCloudMapping::PointCloudMapping(double resolution_)
- {
-     this->resolution = resolution_;
-     voxel.setLeafSize( resolution, resolution, resolution);
-     globalMap = boost::make_shared< PointCloud >( );
- 
-     viewerThread = make_shared<thread>( bind(&PointCloudMapping::viewer, this ) );
- }
+PointCloudMapping::PointCloudMapping(const string &strSettingPath)
+{
+    globalMap = boost::make_shared< PointCloud >();
+
+    viewerThread = make_shared<thread>( bind(&PointCloudMapping::viewer, this ) );
+    
+    // for point cloud resolution
+    cv::FileStorage fpSettings(strSettingPath, cv::FileStorage::READ);
+    resolution = fpSettings["PointCloudMapping.Resolution"];
+
+    voxel.setLeafSize( resolution, resolution, resolution);
+}
  
  void PointCloudMapping::shutdown()
  {
@@ -94,21 +98,21 @@
  }
  
  
- void PointCloudMapping::viewer()
- {
+void PointCloudMapping::viewer()
+{
     //  pcl::visualization::CloudViewer viewer("viewer");
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
     viewer->setBackgroundColor (0, 0, 0);
     
-     while(1)
-     {
-         {
-             unique_lock<mutex> lck_shutdown( shutDownMutex );
-             if (shutDownFlag)
-             {
-                 break;
-             }
-         }
+    while(1)
+    {
+        {
+            unique_lock<mutex> lck_shutdown( shutDownMutex );
+            if (shutDownFlag)
+            {
+                break;
+            }
+        }
         {
             unique_lock<mutex> lck_keyframeUpdated( keyFrameUpdateMutex );
             keyFrameUpdated.wait( lck_keyframeUpdated );
@@ -131,30 +135,30 @@
         voxel.filter( *tmp );
         globalMap->swap( *tmp );
 
-        PointCloudXYZRGB::Ptr cloud_xyzrgb(new PointCloudXYZRGB);
-        pcl::copyPointCloud(*globalMap, *cloud_xyzrgb);
-        //  viewer.showCloud( globalMap );
-        //  viewer = rgbVis(pointCloud); 
+        // PointCloudXYZRGB::Ptr cloud_xyzrgb(new PointCloudXYZRGB);
+        // pcl::copyPointCloud(*globalMap, *cloud_xyzrgb);
+        // //  viewer.showCloud( globalMap );
+        // //  viewer = rgbVis(pointCloud); 
         
         
-        // --------------------------------------------
-        // -----Open 3D viewer and add point cloud-----
-        // --------------------------------------------
-        pcl::visualization::PointCloudColorHandlerRGBField<PointXYZRGB> rgb(cloud_xyzrgb);
-        viewer->addPointCloud<PointXYZRGB> (cloud_xyzrgb, rgb, "sample cloud");
-        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
-        viewer->addCoordinateSystem (1.0);
-        viewer->initCameraParameters ();
+        // // --------------------------------------------
+        // // -----Open 3D viewer and add point cloud-----
+        // // --------------------------------------------
+        // pcl::visualization::PointCloudColorHandlerRGBField<PointXYZRGB> rgb(cloud_xyzrgb);
+        // viewer->addPointCloud<PointXYZRGB> (cloud_xyzrgb, rgb, "sample cloud");
+        // viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
+        // viewer->addCoordinateSystem (1.0);
+        // viewer->initCameraParameters ();
         
-        viewer->spinOnce (1);
-        //  while (!viewer->wasStopped ())
-        //  {
-        //      viewer->spinOnce (100);
-        //     //  boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-        //  }
+        // viewer->spinOnce (1);
+        // //  while (!viewer->wasStopped ())
+        // //  {
+        // //      viewer->spinOnce (100);
+        // //     //  boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+        // //  }
 
-        cout << "show global map, size=" << globalMap->points.size() << endl;
-        lastKeyframeSize = N;
+        // cout << "show global map, size=" << globalMap->points.size() << endl;
+        // lastKeyframeSize = N;
     }
 }
  
