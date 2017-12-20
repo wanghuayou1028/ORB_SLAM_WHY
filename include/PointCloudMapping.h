@@ -26,14 +26,25 @@
  #include <pcl/point_types.h>
  #include <pcl/filters/voxel_grid.h>
  #include <condition_variable>
+ #include <boost/thread/thread.hpp>
+ #include <pcl/common/common_headers.h>
+ #include <pcl/features/normal_3d.h>
+ #include <pcl/console/parse.h>
+
  
  using namespace ORB_SLAM2;
  
  class PointCloudMapping
  {
  public:
+     typedef pcl::PointXYZRGB PointXYZRGB;
+     typedef pcl::PointCloud<PointXYZRGB> PointCloudXYZRGB;
+
      typedef pcl::PointXYZRGBA PointT;
      typedef pcl::PointCloud<PointT> PointCloud;
+
+     
+     
  
      PointCloudMapping( double resolution_ );
  
@@ -63,6 +74,6 @@
      double resolution = 0.04;
      pcl::VoxelGrid<PointT>  voxel;
  };
- 
+  
  #endif // POINTCLOUDMAPPING_H
  

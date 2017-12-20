@@ -20,7 +20,7 @@
  #include "PointCloudMapping.h"
  #include <KeyFrame.h>
  #include <opencv2/highgui/highgui.hpp>
- #include <pcl/visualization/cloud_viewer.h>
+//  #include <pcl/visualization/cloud_viewer.h>
  #include <pcl/visualization/pcl_visualizer.h>
  #include <pcl/common/projection_matrix.h>
  #include <pcl/io/pcd_io.h>
@@ -58,6 +58,8 @@
      keyFrameUpdated.notify_one();
  }
  
+
+ 
  pcl::PointCloud< PointCloudMapping::PointT >::Ptr PointCloudMapping::generatePointCloud(KeyFrame* kf, cv::Mat& color, cv::Mat& depth)
  {
      PointCloud::Ptr tmp( new PointCloud() );
@@ -94,7 +96,10 @@
  
  void PointCloudMapping::viewer()
  {
-     pcl::visualization::CloudViewer viewer("viewer");
+    //  pcl::visualization::CloudViewer viewer("viewer");
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+    viewer->setBackgroundColor (0, 0, 0);
+    
      while(1)
      {
          {
@@ -104,30 +109,52 @@
                  break;
              }
          }
-         {
-             unique_lock<mutex> lck_keyframeUpdated( keyFrameUpdateMutex );
-             keyFrameUpdated.wait( lck_keyframeUpdated );
-         }
+        {
+            unique_lock<mutex> lck_keyframeUpdated( keyFrameUpdateMutex );
+            keyFrameUpdated.wait( lck_keyframeUpdated );
+        }
  
-         // keyframe is updated
-         size_t N=0;
-         {
-             unique_lock<mutex> lck( keyframeMutex );
-             N = keyframes.size();
-         }
+        // keyframe is updated
+        size_t N=0;
+        {
+            unique_lock<mutex> lck( keyframeMutex );
+            N = keyframes.size();
+        }
  
-         for ( size_t i=lastKeyframeSize; i<N ; i++ )
-         {
-             PointCloud::Ptr p = generatePointCloud( keyframes[i], colorImgs[i], depthImgs[i] );
-             *globalMap += *p;
-         }
-         PointCloud::Ptr tmp(new PointCloud());
-         voxel.setInputCloud( globalMap );
-         voxel.filter( *tmp );
-         globalMap->swap( *tmp );
-         viewer.showCloud( globalMap );
-         cout << "show global map, size=" << globalMap->points.size() << endl;
-         lastKeyframeSize = N;
-     }
- }
+        for ( size_t i=lastKeyframeSize; i<N ; i++ )
+        {
+            PointCloud::Ptr p = generatePointCloud( keyframes[i], colorImgs[i], depthImgs[i] );
+            *globalMap += *p;
+        }
+        PointCloud::Ptr tmp(new PointCloud());
+        voxel.setInputCloud( globalMap );
+        voxel.filter( *tmp );
+        globalMap->swap( *tmp );
+
+        PointCloudXYZRGB::Ptr cloud_xyzrgb(new PointCloudXYZRGB);
+        pcl::copyPointCloud(*globalMap, *cloud_xyzrgb);
+        //  viewer.showCloud( globalMap );
+        //  viewer = rgbVis(pointCloud); 
+        
+        
+        // --------------------------------------------
+        // -----Open 3D viewer and add point cloud-----
+        // --------------------------------------------
+        pcl::visualization::PointCloudColorHandlerRGBField<PointXYZRGB> rgb(cloud_xyzrgb);
+        viewer->addPointCloud<PointXYZRGB> (cloud_xyzrgb, rgb, "sample cloud");
+        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
+        viewer->addCoordinateSystem (1.0);
+        viewer->initCameraParameters ();
+        
+        viewer->spinOnce (1);
+        //  while (!viewer->wasStopped ())
+        //  {
+        //      viewer->spinOnce (100);
+        //     //  boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+        //  }
+
+        cout << "show global map, size=" << globalMap->points.size() << endl;
+        lastKeyframeSize = N;
+    }
+}
  
