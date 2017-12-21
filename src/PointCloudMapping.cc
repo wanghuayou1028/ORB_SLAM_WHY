@@ -57,16 +57,19 @@ void PointCloudMapping::Run()
 {
     mbFinished = false;
 
-    // cv::namedWindow("ColorImg", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("ColorImg", CV_WINDOW_AUTOSIZE);
 
     while(1)
     {
         // Tracking will see that Point Cloud Mapping is busy
         SetAcceptKeyFrames(false);
+        // if( !CheckNewKeyFrames() )
+        //     cout << "Point Cloud Mapping has no new KeyFrame" << endl;
 
         // Check if there are keyframes in the queue
         if( CheckNewKeyFrames() )
         {
+            cout << "Point Cloud Mapping has new keyFrame" << endl;
             {
                 unique_lock<mutex> lock(mMutexNewKFs);
                 mpCurrentKeyFrame = mlNewKeyFrames.front();
@@ -78,7 +81,7 @@ void PointCloudMapping::Run()
                 mlDepthImgs.pop_front();
             }
 
-            // cv::imshow("ColorImg", mCVCurrentColorImg);
+            cv::imshow("ColorImg", mCVCurrentColorImg);
             // TODO: dense mapping
         }
         else if( Stop() )

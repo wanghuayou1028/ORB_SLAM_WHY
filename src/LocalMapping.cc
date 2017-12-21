@@ -55,8 +55,12 @@ void LocalMapping::Run()
         SetAcceptKeyFrames(false);
 
         // Check if there are keyframes in the queue
+        // if(!CheckNewKeyFrames())
+        //     cout << "Local Mapping has no KeyFrames" << endl;
+
         if(CheckNewKeyFrames())
         {
+            cout << "Local Mapping has KeyFrames" << endl;
             // BoW conversion and insertion in Map
             ProcessNewKeyFrame();
 
