@@ -43,7 +43,7 @@
 // for pointcloud mapping and viewing
 #include "PointCloudMapping.h"
 
-class PointCloudMapping;
+// class PointCloudMapping;
 
 namespace ORB_SLAM2
 {
@@ -52,6 +52,7 @@ class Viewer;
 class FrameDrawer;
 class Map;
 class LocalMapping;
+class PointCloudMapping;
 class LoopClosing;
 class System;
 
@@ -68,6 +69,7 @@ public:
     cv::Mat GrabImageMonocular(const cv::Mat &im, const double &timestamp);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
+    void SetPointCloudMapper(PointCloudMapping* pPointCloudMapper);
     void SetLoopClosing(LoopClosing* pLoopClosing);
     void SetViewer(Viewer* pViewer);
 
@@ -158,6 +160,7 @@ protected:
 
     //Other Thread Pointers
     LocalMapping* mpLocalMapper;
+    PointCloudMapping* mpPointCloudMapper;
     LoopClosing* mpLoopClosing;
 
     //ORB

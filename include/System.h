@@ -39,8 +39,6 @@
 // for point cloud viewing
 #include "PointCloudMapping.h"
 
-class PointCloudMapping;
-
 namespace ORB_SLAM2
 {
 
@@ -49,6 +47,7 @@ class FrameDrawer;
 class Map;
 class Tracking;
 class LocalMapping;
+class PointCloudMapping;
 class LoopClosing;
 
 class System
@@ -149,6 +148,9 @@ private:
     // Local Mapper. It manages the local map and performs local bundle adjustment.
     LocalMapping* mpLocalMapper;
 
+    // Point Cloud Mapping, It manage the dense point cloud map.
+    PointCloudMapping* mpPointCloudMapper;
+
     // Loop Closer. It searches loops with every new keyframe. If there is a loop it performs
     // a pose graph optimization and full bundle adjustment (in a new thread) afterwards.
     LoopClosing* mpLoopCloser;
@@ -162,8 +164,10 @@ private:
     // System threads: Local Mapping, Loop Closing, Viewer.
     // The Tracking thread "lives" in the main execution thread that creates the System object.
     std::thread* mptLocalMapping;
+    std::thread* mptPointCloudMapping;
     std::thread* mptLoopClosing;
     std::thread* mptViewer;
+    
 
     // Reset flag
     std::mutex mMutexReset;
@@ -181,7 +185,7 @@ private:
     std::mutex mMutexState;
 
     // point cloud mapping
-    shared_ptr<PointCloudMapping> mpPointCloudMapping;
+    // shared_ptr<PointCloudMapping> mpPointCloudMapping;
 };
 
 }// namespace ORB_SLAM

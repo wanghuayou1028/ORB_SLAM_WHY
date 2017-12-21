@@ -80,8 +80,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpFrameDrawer = new FrameDrawer(mpMap);
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
-    // Initialize pointcloud mapping
-    mpPointCloudMapping = make_shared<PointCloudMapping>(strSettingsFile);
+    // // Initialize pointcloud mapping
+    // mpPointCloudMapping = make_shared<PointCloudMapping>(strSettingsFile);
 
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
@@ -90,6 +90,10 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Initialize the Local Mapping thread and launch
     mpLocalMapper = new LocalMapping(mpMap, mSensor==MONOCULAR);
     mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run,mpLocalMapper);
+
+    //Initialize the Point Cloud Mapping thread and launch
+    mpPointCloudMapper = new PointCloudMapping(strSettingsFile);
+    mptPointCloudMapping = new thread(&ORB_SLAM2::PointCloudMapping::Run, mpPointCloudMapper);
 
     //Initialize the Loop Closing thread and launch
     mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR);
@@ -103,9 +107,11 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         mpTracker->SetViewer(mpViewer);
     }
 
+    // todo: add the following function in the corresponding files
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);
     mpTracker->SetLoopClosing(mpLoopCloser);
+    mpTracker->SetPointCloudMapper(mpPointCloudMapper);
 
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(mpLoopCloser);
@@ -303,7 +309,7 @@ void System::Shutdown()
 {
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
-    mpPointCloudMapping->shutdown();
+    mpPointCloudMapper->RequestFinish();
     if(mpViewer)
     {
         mpViewer->RequestFinish();
@@ -312,7 +318,7 @@ void System::Shutdown()
     }
 
     // Wait until all thread have effectively stopped
-    while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
+    while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA() || !mpPointCloudMapper->isFinished())
     {
         usleep(5000);
     }

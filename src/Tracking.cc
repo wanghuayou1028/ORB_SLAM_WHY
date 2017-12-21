@@ -153,6 +153,11 @@ void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
     mpLocalMapper=pLocalMapper;
 }
 
+void Tracking::SetPointCloudMapper(PointCloudMapping* pPointCloudMapper)
+{
+    mpPointCloudMapper = pPointCloudMapper;
+}
+
 void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
 {
     mpLoopClosing=pLoopClosing;
@@ -541,6 +546,7 @@ void Tracking::StereoInitialization()
         cout << "New map created with " << mpMap->MapPointsInMap() << " points" << endl;
 
         mpLocalMapper->InsertKeyFrame(pKFini);
+        mpPointCloudMapper->InsertKeyFrame( pKFini, this->mImGray, this->mImDepth );
 
         mLastFrame = Frame(mCurrentFrame);
         mnLastKeyFrameId=mCurrentFrame.mnId;
@@ -1138,7 +1144,7 @@ void Tracking::CreateNewKeyFrame()
     mpLocalMapper->SetNotStop(false);
 
     // insert Key Frame into point cloud viewer
-    mpPointCloudMapping->insertKeyFrame( pKF, this->mImGray, this->mImDepth );
+    mpPointCloudMapping->InsertKeyFrame( pKF, this->mImGray, this->mImDepth );
 
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;
