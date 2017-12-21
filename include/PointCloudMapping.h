@@ -61,7 +61,12 @@ public:
     void Run();
 
     void InsertKeyFrame( KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth );
-    // void InsertKeyFrame(KeyFrame* pKF);    
+    // void InsertKeyFrame(KeyFrame* pKF); 
+    
+    cv::Mat get_mCVCurrentColorImg()
+    {
+        return mCVCurrentColorImg;
+    }
 
     // Thread Synch
     void RequestStop();

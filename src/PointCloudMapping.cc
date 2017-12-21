@@ -81,7 +81,6 @@ void PointCloudMapping::Run()
                 mlDepthImgs.pop_front();
             }
 
-            cv::imshow("ColorImg", mCVCurrentColorImg);
             // TODO: dense mapping
         }
         else if( Stop() )

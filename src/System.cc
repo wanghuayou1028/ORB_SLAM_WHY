@@ -78,6 +78,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     //Create Drawers. These are used by the Viewer
     mpFrameDrawer = new FrameDrawer(mpMap);
+    // mpPointCloudDrawer = new PointCloudDrawer();
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
     // // Initialize pointcloud mapping

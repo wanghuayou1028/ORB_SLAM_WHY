@@ -63,6 +63,7 @@ src/LoopClosing.cc
 src/ORBextractor.cc
 src/ORBmatcher.cc
 src/FrameDrawer.cc
+#src/PointCloudDrawer.cc
 src/Converter.cc
 src/MapPoint.cc
 src/KeyFrame.cc
