@@ -70,12 +70,12 @@ void PointCloudMapping::Run()
             {
                 unique_lock<mutex> lock(mMutexNewKFs);
                 mpCurrentKeyFrame = mlNewKeyFrames.front();
-                // mCVCurrentColorImg = mlColorImgs.front();
-                // mCVCurrentDepthImg = mlDepthImgs.front();
+                mCVCurrentColorImg = mlColorImgs.front();
+                mCVCurrentDepthImg = mlDepthImgs.front();
 
                 mlNewKeyFrames.pop_front();
-                // mlColorImgs.pop_front();
-                // mlDepthImgs.pop_front();
+                mlColorImgs.pop_front();
+                mlDepthImgs.pop_front();
             }
 
             // cv::imshow("ColorImg", mCVCurrentColorImg);
@@ -100,23 +100,23 @@ void PointCloudMapping::Run()
     SetFinish();
 }
 
-// void PointCloudMapping::InsertKeyFrame(KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth)
-// {
-//     // cout<<"receive a keyframe, id = "<<pKF->mnId<<endl;
-//     unique_lock<mutex> lock(mMutexNewKFs);
-//     mlNewKeyFrames.push_back( pKF );
-//     mlColorImgs.push_back( ImColor.clone() );
-//     mlDepthImgs.push_back( ImDepth.clone() );
-// }
-
-void PointCloudMapping::InsertKeyFrame(KeyFrame* pKF)
+void PointCloudMapping::InsertKeyFrame(KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth)
 {
     // cout<<"receive a keyframe, id = "<<pKF->mnId<<endl;
     unique_lock<mutex> lock(mMutexNewKFs);
     mlNewKeyFrames.push_back( pKF );
-    // mlColorImgs.push_back( ImColor.clone() );
-    // mlDepthImgs.push_back( ImDepth.clone() );
+    mlColorImgs.push_back( ImColor.clone() );
+    mlDepthImgs.push_back( ImDepth.clone() );
 }
+
+// void PointCloudMapping::InsertKeyFrame(KeyFrame* pKF)
+// {
+//     // cout<<"receive a keyframe, id = "<<pKF->mnId<<endl;
+//     unique_lock<mutex> lock(mMutexNewKFs);
+//     mlNewKeyFrames.push_back( pKF );
+//     // mlColorImgs.push_back( ImColor.clone() );
+//     // mlDepthImgs.push_back( ImDepth.clone() );
+// }
 
 bool PointCloudMapping::CheckNewKeyFrames()
 {
