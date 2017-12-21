@@ -225,7 +225,7 @@ protected:
     list<MapPoint*> mlpTemporalPoints;
 
     // for point cloud viewing, this is initialized automaticly
-    shared_ptr<PointCloudMapping> mpPointCloudMapping;
+    // shared_ptr<PointCloudMapping> mpPointCloudMapping;
 };
 
 } //namespace ORB_SLAM
