@@ -19,7 +19,7 @@
 */
 
 
-
+#include "PointCloudMapping.h"
 #include "System.h"
 #include "Converter.h"
 #include <thread>
@@ -479,6 +479,14 @@ void System::SaveTrajectoryKITTI(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
+
+void System::SavePointCloud(const string &filename)
+{
+    cout << endl << "Saving Point Cloud to " << filename << "......" << endl;
+    pcl::io::savePCDFileBinary(filename, *(mpPointCloudMapper->get_globalPointCloudMap()) );
+    cout << endl << "Point Cloud saved!" << endl;
+}
+
 
 int System::GetTrackingState()
 {

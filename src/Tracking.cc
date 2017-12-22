@@ -545,9 +545,21 @@ void Tracking::StereoInitialization()
 
         cout << "New map created with " << mpMap->MapPointsInMap() << " points" << endl;
 
-        mpLocalMapper->InsertKeyFrame(pKFini);
-        mpPointCloudMapper->InsertKeyFrame( pKFini, mImGray, mImDepth );
+        // mpLocalMapper->InsertKeyFrame(pKFini);
+        // mpPointCloudMapper->InsertKeyFrame( pKFini, mImGray, mImDepth );
         // mpPointCloudMapper->InsertKeyFrame( pKFini );
+
+        // KeyFrame KFini_PointCloud = *pKFini;
+        // KeyFrame* pKFini_PointCloud = &KFini_PointCloud;
+        cv::Mat ImGray;
+        this->mImGray.copyTo(ImGray);
+        cv::Mat ImDepth;
+        this->mImDepth.copyTo(ImDepth);
+
+        mpLocalMapper->InsertKeyFrame(pKFini);
+        mpPointCloudMapper->InsertKeyFrame(pKFini, ImGray, ImDepth);
+        // mpPointCloudMapper->InsertKeyFrame(ImGray, ImDepth);
+
 
         mLastFrame = Frame(mCurrentFrame);
         mnLastKeyFrameId=mCurrentFrame.mnId;
@@ -1140,12 +1152,25 @@ void Tracking::CreateNewKeyFrame()
         }
     }
 
+    cv::Mat ImGray;
+    this->mImGray.copyTo(ImGray);
+
+    // unsigned char* row_ptr_mImgray = mImGray.ptr<unsigned char> ( 1 );
+    // unsigned char* row_ptr_Imgray = ImGray.ptr<unsigned char> ( 1 );
+    // cout << "The pointer of mImgray is : " << *row_ptr_mImgray << endl;
+    // cout << "The pointer of ImgGray is : " << *row_ptr_Imgray << endl;
+
+    cv::Mat ImDepth;
+    this->mImDepth.copyTo(ImDepth);
+
     mpLocalMapper->InsertKeyFrame(pKF);
+    mpPointCloudMapper->InsertKeyFrame(pKF, ImGray, ImDepth);
+    // mpPointCloudMapper->InsertKeyFrame(ImGray, ImDepth);
 
     mpLocalMapper->SetNotStop(false);
 
     // insert Key Frame into point cloud viewer
-    mpPointCloudMapper->InsertKeyFrame( pKF, mImGray, mImDepth );
+    // mpPointCloudMapper->InsertKeyFrame( pKF, mImGray, mImDepth );
 
     // mpPointCloudMapper->InsertKeyFrame( pKF );
 

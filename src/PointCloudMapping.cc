@@ -35,6 +35,7 @@
 #include<thread>
 
 using namespace std;
+using namespace cv;
 
 namespace ORB_SLAM2
 {
@@ -42,7 +43,7 @@ namespace ORB_SLAM2
 PointCloudMapping::PointCloudMapping(const string &strSettingPath): mbFinishRequested(false), mbFinished(true),
     mbStopped(false), mbStopRequested(false), mbNotStop(false), mbAcceptKeyFrames(true)
 {
-    // globalPointCloudMap = boost::make_shared< PointCloud >();
+    globalPointCloudMap = boost::make_shared< pcl::PointCloud<pcl::PointXYZRGB> >();
 
     // viewerThread = make_shared<thread>( bind(&PointCloudMapping::viewer, this ) );
     
@@ -57,7 +58,7 @@ void PointCloudMapping::Run()
 {
     mbFinished = false;
 
-    cv::namedWindow("ColorImg", CV_WINDOW_AUTOSIZE);
+    // cv::namedWindow("ColorImg", CV_WINDOW_AUTOSIZE);
 
     while(1)
     {
@@ -76,10 +77,31 @@ void PointCloudMapping::Run()
                 mCVCurrentColorImg = mlColorImgs.front();
                 mCVCurrentDepthImg = mlDepthImgs.front();
 
+                cout << "mpCurrentKeyFrame.size()" << mlNewKeyFrames.size() << endl;
+
                 mlNewKeyFrames.pop_front();
                 mlColorImgs.pop_front();
                 mlDepthImgs.pop_front();
+
+                // test the image 
+                // mCVCurrentColorImg( cv::Rect ( 0,0,100,100 ) ).setTo ( 0 ); // 将左上角100*100的块置零
+                
+                // imshow("ORB-SLAM: PointCloud", mCVCurrentColorImg);
+                // cv::waitKey(1.0/30.0);
+
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr p = generatePointCloud( mpCurrentKeyFrame, mCVCurrentColorImg, mCVCurrentDepthImg );
+                *globalPointCloudMap += *p;
+
+                pcl::PointCloud< pcl::PointXYZRGB >::Ptr tmp( new pcl::PointCloud< pcl::PointXYZRGB >() );                                
+                voxel.setInputCloud( globalPointCloudMap );
+                voxel.filter( *tmp );
+                globalPointCloudMap->swap( *tmp );
+
+                cout<<"generated point cloud size="<<globalPointCloudMap->points.size()<<endl;
             }
+
+            cout << mCVCurrentColorImg.cols << endl;
+            cout << mCVCurrentColorImg.rows << endl;
 
             // TODO: dense mapping
         }
@@ -99,6 +121,9 @@ void PointCloudMapping::Run()
         if(CheckFinish())
             break;
     }
+
+    // pcl::io::savePCDFileBinary("Pointcloud.pcd", *globalPointCloudMap );
+    
     SetFinish();
 }
 
@@ -126,38 +151,38 @@ bool PointCloudMapping::CheckNewKeyFrames()
     return(!mlNewKeyFrames.empty());
 }
 
-// pcl::PointCloud< pcl::PointXYZRGB >::Ptr PointCloudMapping::generatePointCloud(KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth)
-// {
-//     pcl::PointCloud< pcl::PointXYZRGB >::Ptr tmp( new pcl::PointCloud< pcl::PointXYZRGB >() );
-//     // point cloud is null ptr
-//     for ( int m=0; m<depth.rows; m+=3 )
-//     {
-//         for ( int n=0; n<depth.cols; n+=3 )
-//         {
-//             float d = depth.ptr<float>(m)[n];
-//             if (d < 0.01 || d>10)
-//                 continue;
-//             pcl::PointXYZRGB p;
-//             p.z = d;
-//             p.x = ( n - kf->cx) * p.z / kf->fx;
-//             p.y = ( m - kf->cy) * p.z / kf->fy;
+pcl::PointCloud< pcl::PointXYZRGB >::Ptr PointCloudMapping::generatePointCloud(KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth)
+{
+    pcl::PointCloud< pcl::PointXYZRGB >::Ptr tmp( new pcl::PointCloud< pcl::PointXYZRGB >() );
+    // point cloud is null ptr
+    for ( int m=0; m<ImDepth.rows; m+=3 )
+    {
+        for ( int n=0; n<ImDepth.cols; n+=3 )
+        {
+            float d = ImDepth.ptr<float>(m)[n];
+            if (d < 0.01 || d>10)
+                continue;
+            pcl::PointXYZRGB p;
+            p.z = d;
+            p.x = ( n - pKF->cx) * p.z / pKF->fx;
+            p.y = ( m - pKF->cy) * p.z / pKF->fy;
  
-//             p.b = color.ptr<uchar>(m)[n*3];
-//             p.g = color.ptr<uchar>(m)[n*3+1];
-//             p.r = color.ptr<uchar>(m)[n*3+2];
+            p.b = ImColor.ptr<uchar>(m)[n*3];
+            p.g = ImColor.ptr<uchar>(m)[n*3+1];
+            p.r = ImColor.ptr<uchar>(m)[n*3+2];
  
-//             tmp->points.push_back(p);
-//         }
-//     }
+            tmp->points.push_back(p);
+        }
+    }
  
-//     Eigen::Isometry3d T = ORB_SLAM2::Converter::toSE3Quat( kf->GetPose() );
-//     pcl::PointCloud< pcl::PointXYZRGB >::Ptr cloud(new pcl::PointCloud< pcl::PointXYZRGB >());
-//     pcl::transformPointCloud( *tmp, *cloud, T.inverse().matrix());
-//     cloud->is_dense = false;
+    Eigen::Isometry3d T = ORB_SLAM2::Converter::toSE3Quat( pKF->GetPose() );
+    pcl::PointCloud< pcl::PointXYZRGB >::Ptr cloud(new pcl::PointCloud< pcl::PointXYZRGB >());
+    pcl::transformPointCloud( *tmp, *cloud, T.inverse().matrix());
+    cloud->is_dense = false;
  
-//     cout<<"generate point cloud for kf "<<kf->mnId<<", size="<<cloud->points.size()<<endl;
-//     return cloud;
-// }
+    cout<<"generate point cloud for pKF "<<pKF->mnId<<", size="<<cloud->points.size()<<endl;
+    return cloud;
+}
  
  
 // void PointCloudMapping::viewer()

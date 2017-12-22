@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 
+#include <pcl/io/pcd_io.h>
 #include <pcl/common/transforms.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
@@ -61,11 +62,17 @@ public:
     void Run();
 
     void InsertKeyFrame( KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth );
+    // void InsertKeyFrame( cv::Mat& ImColor, cv::Mat& ImDepth);
     // void InsertKeyFrame(KeyFrame* pKF); 
     
     cv::Mat get_mCVCurrentColorImg()
     {
         return mCVCurrentColorImg;
+    }
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr get_globalPointCloudMap()
+    {
+        return globalPointCloudMap;
     }
 
     // Thread Synch
@@ -86,9 +93,9 @@ public:
     }
 
 protected:
-    // pcl::PointCloud<pcl::PointXYZRGB>::Ptr generatePointCloud(KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr generatePointCloud(KeyFrame* pKF, cv::Mat& ImColor, cv::Mat& ImDepth);
 
-    // pcl::PointCloud<pcl::PointXYZRGB>::Ptr globalPointCloudMap;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr globalPointCloudMap;
 
     bool CheckNewKeyFrames();
 
