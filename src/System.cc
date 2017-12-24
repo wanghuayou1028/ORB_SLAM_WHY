@@ -487,6 +487,32 @@ void System::SavePointCloud(const string &filename)
     cout << endl << "Point Cloud saved!" << endl;
 }
 
+void System::SaveOctoMap(const string &filename)
+{
+    pcl::PointCloud<pcl::PointXYZRGB> cloud;
+    // pcl::io::loadPCDFile<pcl::PointXYZRGB>(filename1, cloud);
+    cloud = *(mpPointCloudMapper->get_globalPointCloudMap());
+
+    cout << "Saving Octomap " << "....." << endl;
+    octomap::ColorOcTree tree(0.05);
+
+    for( auto p:cloud.points)
+    {
+        tree.updateNode( octomap::point3d(p.x, p.y, p.z), true );
+    }
+
+    // set octomap color
+    for (auto p:cloud.points)
+    {
+        tree.integrateNodeColor( p.x, p.y, p.z, p.r, p.g, p.b );
+    }
+
+    tree.updateInnerOccupancy();
+
+    tree.writeBinary( filename );
+    cout << "The octomap is saved!" << endl;
+
+}
 
 int System::GetTrackingState()
 {

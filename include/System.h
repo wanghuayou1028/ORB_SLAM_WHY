@@ -40,6 +40,9 @@
 // for point cloud viewing
 #include "PointCloudMapping.h"
 
+#include <octomap/octomap.h>
+#include <octomap/ColorOcTree.h>
+
 namespace ORB_SLAM2
 {
 
@@ -120,6 +123,10 @@ public:
 
     // Save Dense Point Cloud
     void SavePointCloud(const string &filename);
+
+    // Save Octomap
+    void SaveOctoMap(const string &filename);
+    
 
     // TODO: Save/Load functions
     // SaveMap(const string &filename);

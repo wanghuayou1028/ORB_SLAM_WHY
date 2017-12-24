@@ -136,6 +136,7 @@ int main(int argc, char **argv)
     SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");   
     SLAM.SavePointCloud("PointCloud.pcd");
+    SLAM.SaveOctoMap("OctoMap.bt");
 
     return 0;
 }

@@ -42,12 +42,16 @@ find_package(Pangolin REQUIRED)
 # adding for point cloud viewer and mapper
 find_package( PCL 1.7 REQUIRED )
 
+# adding for octomap
+FIND_PACKAGE( octomap REQUIRED )
+
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
 ${PCL_INCLUDE_DIRS}
+${OCTOMAP_INCLUDE_DIRS}
 )
 
 add_definitions( ${PCL_DEFINITIONS} )
@@ -86,6 +90,7 @@ ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 ${PCL_LIBRARIES}
+${OCTOMAP_LIBRARIES}
 )
 
 # Build examples
