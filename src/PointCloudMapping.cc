@@ -92,17 +92,22 @@ void PointCloudMapping::Run()
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr p = generatePointCloud( mpCurrentKeyFrame, mCVCurrentColorImg, mCVCurrentDepthImg );
                 *globalPointCloudMap += *p;
 
-                pcl::PointCloud< pcl::PointXYZRGB >::Ptr tmp( new pcl::PointCloud< pcl::PointXYZRGB >() );                                
-                voxel.setInputCloud( globalPointCloudMap );
-                voxel.filter( *tmp );
-                globalPointCloudMap->swap( *tmp );
+                // pcl::PointCloud< pcl::PointXYZRGB >::Ptr tmp( new pcl::PointCloud< pcl::PointXYZRGB >() );                                
+                // voxel.setInputCloud( globalPointCloudMap );
+                // voxel.filter( *tmp );
+                // globalPointCloudMap->swap( *tmp );
 
-                cout<<"generated point cloud size="<<globalPointCloudMap->points.size()<<endl;
+                cout<<"generated point cloud size= " << globalPointCloudMap->points.size() << endl;
             }
 
             cout << mCVCurrentColorImg.cols << endl;
             cout << mCVCurrentColorImg.rows << endl;
 
+            if( globalPointCloudMap->points.size() != 0 )
+            {
+                pcl::io::savePCDFileBinary("PointCloud.pcd", *globalPointCloudMap );
+            }
+            
             // TODO: dense mapping
         }
         else if( Stop() )
@@ -122,7 +127,7 @@ void PointCloudMapping::Run()
             break;
     }
 
-    // pcl::io::savePCDFileBinary("Pointcloud.pcd", *globalPointCloudMap );
+    pcl::io::savePCDFileBinary("PointCloud.pcd", *globalPointCloudMap );
     
     SetFinish();
 }
@@ -155,12 +160,18 @@ pcl::PointCloud< pcl::PointXYZRGB >::Ptr PointCloudMapping::generatePointCloud(K
 {
     pcl::PointCloud< pcl::PointXYZRGB >::Ptr tmp( new pcl::PointCloud< pcl::PointXYZRGB >() );
     // point cloud is null ptr
+    // cout << "ImDepth.rows: " << ImDepth.rows << "ImDepth.cols: " << ImDepth.cols << endl;
+    // cout << "ImColor.rows: " << ImColor.rows << "ImDepth.cols: " << ImDepth.cols << endl;
     for ( int m=0; m<ImDepth.rows; m+=3 )
     {
         for ( int n=0; n<ImDepth.cols; n+=3 )
         {
             float d = ImDepth.ptr<float>(m)[n];
-            if (d < 0.01 || d>10)
+            // if the data is from Kinect, mm style
+            if(d > 10)
+                d /= 1000;
+            cout << "The depth of image pixel " << m << "*" << n << " is " << d << endl;
+            if ( d < 0.01 || d > 8 )
                 continue;
             pcl::PointXYZRGB p;
             p.z = d;

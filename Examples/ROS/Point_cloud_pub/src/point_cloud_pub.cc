@@ -19,15 +19,21 @@ int main (int argc, char **argv)
   pcl::PointCloud<pcl::PointXYZRGB> cloud;  
   sensor_msgs::PointCloud2 output;
   // cloud = ORB_SLAM2::System.mpPointCloudMapper->get_globalPointCloudMap();  
-  pcl::io::loadPCDFile ("/home/why/SLAM/demo/orbslam2_ws/src/ORB_SLAM2/PointCloud.pcd", cloud);  
-  pcl::toROSMsg(cloud,output);// transfer to ROS data type
+  // pcl::io::loadPCDFile ("/home/why/SLAM/demo/orbslam2_ws/src/ORB_SLAM2/PointCloud.pcd", cloud);  
+  // pcl::toROSMsg(cloud,output);// transfer to ROS data type
 
-  output.header.stamp=ros::Time::now();
-  output.header.frame_id  ="camera_rgb_frame";
+  // output.header.stamp=ros::Time::now();
+  // output.header.frame_id  ="camera_rgb_frame";
 
   ros::Rate loop_rate(1);  
   while (ros::ok())  
   {  
+    pcl::io::loadPCDFile ("/home/why/SLAM/demo/orbslam2_ws/PointCloud.pcd", cloud);  
+    pcl::toROSMsg(cloud,output);// transfer to ROS data type
+  
+    output.header.stamp=ros::Time::now();
+    output.header.frame_id  ="camera_rgb_frame";
+
     pcl_pub.publish(output);  
     ros::spinOnce();  
     loop_rate.sleep();  

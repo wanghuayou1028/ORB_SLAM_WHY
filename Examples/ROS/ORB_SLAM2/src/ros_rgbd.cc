@@ -34,6 +34,11 @@
 
 #include"../../../include/System.h"
 
+#include<pcl/point_cloud.h>  
+#include<pcl_conversions/pcl_conversions.h>  
+#include<sensor_msgs/PointCloud2.h>  
+#include<pcl/io/pcd_io.h>
+
 using namespace std;
 
 class ImageGrabber
@@ -62,15 +67,17 @@ int main(int argc, char **argv)
     ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::RGBD,true);
 
     ImageGrabber igb(&SLAM);
-
+ 
     ros::NodeHandle nh;
+
+    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("/orbslam2_with_kinect2/output", 10); 
 
     message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/camera/rgb/image_raw", 1);
     message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/camera/depth/image", 1);
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
-
+ 
     ros::spin();
 
     // Stop all threads
@@ -110,8 +117,23 @@ void ImageGrabber::GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const senso
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return;
     }
-
+    
     mpSLAM->TrackRGBD(cv_ptrRGB->image,cv_ptrD->image,cv_ptrRGB->header.stamp.toSec());
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;  
+    sensor_msgs::PointCloud2 output;
+
+    cloud = mpSLAM->mpPointCloudMapper->get_globalPointCloudMap();
+    // pcl::io::loadPCDFile ("/home/why/SLAM/demo/orbslam2_ws/PointCloud.pcd", cloud);  
+        
+    cout << "The size of cloud: " << cloud->points.size() << endl;
+    
+    pcl::toROSMsg(*cloud,output);// transfer to ROS data type
+        
+    output.header.stamp=ros::Time::now();
+    output.header.frame_id  ="camera_rgb_frame";
+      
+    pcl_pub.publish(output);
 }
 
 
