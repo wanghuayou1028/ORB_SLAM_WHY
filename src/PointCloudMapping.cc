@@ -70,14 +70,14 @@ void PointCloudMapping::Run()
         // Check if there are keyframes in the queue
         if( CheckNewKeyFrames() )
         {
-            cout << "Point Cloud Mapping has new keyFrame" << endl;
+            // cout << "Point Cloud Mapping has new keyFrame" << endl;
             {
                 unique_lock<mutex> lock(mMutexNewKFs);
                 mpCurrentKeyFrame = mlNewKeyFrames.front();
                 mCVCurrentColorImg = mlColorImgs.front();
                 mCVCurrentDepthImg = mlDepthImgs.front();
 
-                cout << "mpCurrentKeyFrame.size()" << mlNewKeyFrames.size() << endl;
+                // cout << "mpCurrentKeyFrame.size()" << mlNewKeyFrames.size() << endl;
 
                 mlNewKeyFrames.pop_front();
                 mlColorImgs.pop_front();
@@ -100,8 +100,8 @@ void PointCloudMapping::Run()
                 cout<<"generated point cloud size= " << globalPointCloudMap->points.size() << endl;
             }
 
-            cout << mCVCurrentColorImg.cols << endl;
-            cout << mCVCurrentColorImg.rows << endl;
+            // cout << mCVCurrentColorImg.cols << endl;
+            // cout << mCVCurrentColorImg.rows << endl;
 
             if( globalPointCloudMap->points.size() != 0 )
             {
@@ -170,7 +170,7 @@ pcl::PointCloud< pcl::PointXYZRGB >::Ptr PointCloudMapping::generatePointCloud(K
             // if the data is from Kinect, mm style
             if(d > 10)
                 d /= 1000;
-            cout << "The depth of image pixel " << m << "*" << n << " is " << d << endl;
+            // cout << "The depth of image pixel " << m << "*" << n << " is " << d << endl;
             if ( d < 0.01 || d > 8 )
                 continue;
             pcl::PointXYZRGB p;

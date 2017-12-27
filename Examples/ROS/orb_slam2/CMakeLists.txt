@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(point_cloud_pub)
+project(orb_slam2)
+
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+
+IF(NOT ROS_BUILD_TYPE)
+  SET(ROS_BUILD_TYPE Release)
+ENDIF()
+
+MESSAGE("Build type: " ${ROS_BUILD_TYPE})
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -16,6 +24,29 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   pcl_conversions
   pcl_ros
+  tf
+)
+
+find_package( OpenCV REQUIRED )
+
+
+find_package( Eigen3 REQUIRED )
+find_package( Pangolin REQUIRED )
+
+include_directories(
+${PROJECT_SOURCE_DIR}
+${PROJECT_SOURCE_DIR}/../../../
+${PROJECT_SOURCE_DIR}/../../../include
+${Pangolin_INCLUDE_DIRS}
+)
+
+set(LIBS 
+${OpenCV_LIBS} 
+${EIGEN3_LIBS}
+${Pangolin_LIBRARIES}
+${PROJECT_SOURCE_DIR}/../../../Thirdparty/DBoW2/lib/libDBoW2.so
+${PROJECT_SOURCE_DIR}/../../../Thirdparty/g2o/lib/libg2o.so
+${PROJECT_SOURCE_DIR}/../../../lib/libORB_SLAM2.so
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,9 +140,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-   LIBRARIES point_cloud_pub
-   CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs cv_bridge image_transport pcl_conversions pcl_ros
-#  DEPENDS system_lib
+   LIBRARIES orb_slam2
+   CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs cv_bridge image_transport pcl_conversions pcl_ros tf
+#   DEPENDS system_lib
 )
 
 ###########
@@ -127,7 +158,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/point_cloud_pub.cpp
+#   src/${PROJECT_NAME}/orb_slam2.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -138,7 +169,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/point_cloud_pub_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/orb_slam2_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -154,6 +185,48 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+# Node for monocular camera
+add_executable(Mono
+src/ros_mono.cc
+)
+
+target_link_libraries(Mono
+${catkin_LIBRARIES}
+${LIBS}
+)
+
+# Node for monocular camera (Augmented Reality Demo)
+add_executable(MonoAR
+src/AR/ros_mono_ar.cc
+src/AR/ViewerAR.h
+src/AR/ViewerAR.cc
+)
+
+target_link_libraries(MonoAR
+${catkin_LIBRARIES}
+${LIBS}
+)
+
+# Node for stereo camera
+add_executable(Stereo
+src/ros_stereo.cc
+)
+
+target_link_libraries(Stereo
+${catkin_LIBRARIES}
+${LIBS}
+)
+
+# Node for RGB-D camera
+add_executable(RGBD
+src/ros_rgbd.cc
+)
+
+target_link_libraries(RGBD
+${catkin_LIBRARIES}
+${LIBS}
+)
 
 #############
 ## Install ##
@@ -195,13 +268,10 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_Point_cloud_pub.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_orb_slam2.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-add_executable(point_cloud_pub src/point_cloud_pub.cc)
-target_link_libraries(point_cloud_pub ${catkin_LIBRARIES})

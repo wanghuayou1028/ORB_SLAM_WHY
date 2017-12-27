@@ -138,6 +138,12 @@ public:
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
+    // get mpPointCloudMapper
+    PointCloudMapping* get_mpPointCloudMapper()
+    {
+        return mpPointCloudMapper;
+    }
+
 private:
 
     // Input sensor
