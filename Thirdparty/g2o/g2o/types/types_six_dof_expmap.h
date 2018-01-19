@@ -201,6 +201,36 @@ public:
   double fx, fy, cx, cy, bf;
 };
 
+// define an edge for optimizing both the reprojection and geometric error
+class EdgeSE3ProjectXYZRGBDOnlyPose: public BaseUnaryEdge<3, Vector3d, VertexSE3Expmap>{
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  EdgeSE3ProjectXYZRGBDOnlyPose(){}
+
+  bool read(std::istream& is);
+  
+  bool write(std::ostream& os) const;
+
+  void computeError() {
+    const VertexSE3Expmap* v1 = static_cast<const VertexSE3Expmap*>(_vertices[0]);
+    Vector3d obs(_measurement);
+    _error = obs - cam_project(v1->estimate().map(Xw));
+  }
+
+  bool isDepthPositive() {
+    const VertexSE3Expmap* v1 = static_cast<const VertexSE3Expmap*>(_vertices[0]);
+    return (v1->estimate().map(Xw))(2)>0.0;
+  }
+
+  virtual void linearizeOplus();
+
+  Vector3d cam_project(const Vector3d trans_xyz) const;
+
+  Vector3d Xw;
+  double fx, fy, cx, cy, bf;
+};
+
 
 
 } // end namespace
