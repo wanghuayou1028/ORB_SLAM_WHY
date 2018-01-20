@@ -228,7 +228,7 @@ public:
   Vector3d cam_project(const Vector3d trans_xyz) const;
 
   Vector3d Xw;
-  double fx, fy, cx, cy, bf;
+  double fx, fy, cx, cy;
 };
 
 

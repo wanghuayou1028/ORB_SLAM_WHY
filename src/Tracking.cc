@@ -794,7 +794,8 @@ bool Tracking::TrackReferenceKeyFrame()
     mCurrentFrame.mvpMapPoints = vpMapPointMatches;
     mCurrentFrame.SetPose(mLastFrame.mTcw);
 
-    Optimizer::PoseOptimization(&mCurrentFrame);
+    // Optimizer::PoseOptimization(&mCurrentFrame);
+    Optimizer::PoseOptimizationRGBD(&mCurrentFrame);
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -917,7 +918,8 @@ bool Tracking::TrackWithMotionModel()
         return false;
 
     // Optimize frame pose with all matches
-    Optimizer::PoseOptimization(&mCurrentFrame);
+    // Optimizer::PoseOptimization(&mCurrentFrame);
+    Optimizer::PoseOptimizationRGBD(&mCurrentFrame);    
 
     // Discard outliers
     int nmatchesMap = 0;
@@ -959,7 +961,8 @@ bool Tracking::TrackLocalMap()
     SearchLocalPoints();
 
     // Optimize Pose
-    Optimizer::PoseOptimization(&mCurrentFrame);
+    // Optimizer::PoseOptimization(&mCurrentFrame);
+    Optimizer::PoseOptimizationRGBD(&mCurrentFrame);    
     mnMatchesInliers = 0;
 
     // Update MapPoints Statistics
@@ -1477,7 +1480,8 @@ bool Tracking::Relocalization()
                         mCurrentFrame.mvpMapPoints[j]=NULL;
                 }
 
-                int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+                // int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+                int nGood = Optimizer::PoseOptimizationRGBD(&mCurrentFrame);                
 
                 if(nGood<10)
                     continue;
@@ -1493,7 +1497,8 @@ bool Tracking::Relocalization()
 
                     if(nadditional+nGood>=50)
                     {
-                        nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+                        // nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+                        nGood = Optimizer::PoseOptimizationRGBD(&mCurrentFrame);                        
 
                         // If many inliers but still not enough, search by projection again in a narrower window
                         // the camera has been already optimized with many points
@@ -1508,7 +1513,8 @@ bool Tracking::Relocalization()
                             // Final optimization
                             if(nGood+nadditional>=50)
                             {
-                                nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+                                // nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+                                nGood = Optimizer::PoseOptimizationRGBD(&mCurrentFrame);                                
 
                                 for(int io =0; io<mCurrentFrame.N; io++)
                                     if(mCurrentFrame.mvbOutlier[io])
