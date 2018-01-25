@@ -303,7 +303,8 @@ void Optimizer::BundleAdjustmentRGBD(const vector<KeyFrame *> &vpKFs, const vect
 
             const cv::KeyPoint &kpUn = pKF->mvKeysUn[mit->second];
 
-            if(pKF->mvuRight[mit->second]<0)
+            // not optimize the inverse depth error
+            if(pKF->mvDepth[mit->second] == -1)
             {
                 Eigen::Matrix<double,2,1> obs;
                 obs << kpUn.pt.x, kpUn.pt.y;
@@ -330,13 +331,13 @@ void Optimizer::BundleAdjustmentRGBD(const vector<KeyFrame *> &vpKFs, const vect
 
                 optimizer.addEdge(e);
             }
-            else
+            else // optimize the inverse depth error 
             {
                 Eigen::Matrix<double,3,1> obs;
-                const float kp_ur = pKF->mvuRight[mit->second];
-                obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
+                const float kp_invz = 1.0/pKF->mvDepth[mit->second];
+                obs << kpUn.pt.x, kpUn.pt.y, kp_invz;
 
-                g2o::EdgeStereoSE3ProjectXYZ* e = new g2o::EdgeStereoSE3ProjectXYZ();
+                g2o::EdgeRGBDSE3ProjectXYZ* e = new g2o::EdgeRGBDSE3ProjectXYZ();
 
                 e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(id)));
                 e->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(pKF->mnId)));
@@ -356,7 +357,6 @@ void Optimizer::BundleAdjustmentRGBD(const vector<KeyFrame *> &vpKFs, const vect
                 e->fy = pKF->fy;
                 e->cx = pKF->cx;
                 e->cy = pKF->cy;
-                e->bf = pKF->mbf;
 
                 optimizer.addEdge(e);
             }
@@ -1289,17 +1289,17 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
     vector<MapPoint*> vpMapPointEdgeMono;
     vpMapPointEdgeMono.reserve(nExpectedSize);
 
-    vector<g2o::EdgeStereoSE3ProjectXYZ*> vpEdgesStereo;
-    vpEdgesStereo.reserve(nExpectedSize);
+    vector<g2o::EdgeRGBDSE3ProjectXYZ*> vpEdgesRGBD;
+    vpEdgesRGBD.reserve(nExpectedSize);
 
-    vector<KeyFrame*> vpEdgeKFStereo;
-    vpEdgeKFStereo.reserve(nExpectedSize);
+    vector<KeyFrame*> vpEdgeKFRGBD;
+    vpEdgeKFRGBD.reserve(nExpectedSize);
 
-    vector<MapPoint*> vpMapPointEdgeStereo;
-    vpMapPointEdgeStereo.reserve(nExpectedSize);
+    vector<MapPoint*> vpMapPointEdgeRGBD;
+    vpMapPointEdgeRGBD.reserve(nExpectedSize);
 
     const float thHuberMono = sqrt(5.991);
-    const float thHuberStereo = sqrt(7.815);
+    const float thHuberRGBD = sqrt(7.815);
 
     for(list<MapPoint*>::iterator lit=lLocalMapPoints.begin(), lend=lLocalMapPoints.end(); lit!=lend; lit++)
     {
@@ -1322,8 +1322,8 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
             {                
                 const cv::KeyPoint &kpUn = pKFi->mvKeysUn[mit->second];
 
-                // Monocular observation
-                if(pKFi->mvuRight[mit->second]<0)
+                // not optimize the inverse depth error
+                if(pKFi->mvDepth[mit->second] == -1)
                 {
                     Eigen::Matrix<double,2,1> obs;
                     obs << kpUn.pt.x, kpUn.pt.y;
@@ -1350,13 +1350,13 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
                     vpEdgeKFMono.push_back(pKFi);
                     vpMapPointEdgeMono.push_back(pMP);
                 }
-                else // Stereo observation
+                else // optimize the inverse depth error
                 {
                     Eigen::Matrix<double,3,1> obs;
-                    const float kp_ur = pKFi->mvuRight[mit->second];
-                    obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
+                    const float kp_invz = 1.0/pKFi->mvDepth[mit->second];
+                    obs << kpUn.pt.x, kpUn.pt.y, kp_invz;
 
-                    g2o::EdgeStereoSE3ProjectXYZ* e = new g2o::EdgeStereoSE3ProjectXYZ();
+                    g2o::EdgeRGBDSE3ProjectXYZ* e = new g2o::EdgeRGBDSE3ProjectXYZ();
 
                     e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(id)));
                     e->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(pKFi->mnId)));
@@ -1367,18 +1367,17 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
 
                     g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
                     e->setRobustKernel(rk);
-                    rk->setDelta(thHuberStereo);
+                    rk->setDelta(thHuberRGBD);
 
                     e->fx = pKFi->fx;
                     e->fy = pKFi->fy;
                     e->cx = pKFi->cx;
                     e->cy = pKFi->cy;
-                    e->bf = pKFi->mbf;
 
                     optimizer.addEdge(e);
-                    vpEdgesStereo.push_back(e);
-                    vpEdgeKFStereo.push_back(pKFi);
-                    vpMapPointEdgeStereo.push_back(pMP);
+                    vpEdgesRGBD.push_back(e);
+                    vpEdgeKFRGBD.push_back(pKFi);
+                    vpMapPointEdgeRGBD.push_back(pMP);
                 }
             }
         }
@@ -1417,10 +1416,10 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
         e->setRobustKernel(0);
     }
 
-    for(size_t i=0, iend=vpEdgesStereo.size(); i<iend;i++)
+    for(size_t i=0, iend=vpEdgesRGBD.size(); i<iend;i++)
     {
-        g2o::EdgeStereoSE3ProjectXYZ* e = vpEdgesStereo[i];
-        MapPoint* pMP = vpMapPointEdgeStereo[i];
+        g2o::EdgeRGBDSE3ProjectXYZ* e = vpEdgesRGBD[i];
+        MapPoint* pMP = vpMapPointEdgeRGBD[i];
 
         if(pMP->isBad())
             continue;
@@ -1441,7 +1440,7 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
     }
 
     vector<pair<KeyFrame*,MapPoint*> > vToErase;
-    vToErase.reserve(vpEdgesMono.size()+vpEdgesStereo.size());
+    vToErase.reserve(vpEdgesMono.size()+vpEdgesRGBD.size());
 
     // Check inlier observations       
     for(size_t i=0, iend=vpEdgesMono.size(); i<iend;i++)
@@ -1459,17 +1458,17 @@ void Optimizer::LocalBundleAdjustmentRGBD(KeyFrame *pKF, bool* pbStopFlag, Map* 
         }
     }
 
-    for(size_t i=0, iend=vpEdgesStereo.size(); i<iend;i++)
+    for(size_t i=0, iend=vpEdgesRGBD.size(); i<iend;i++)
     {
-        g2o::EdgeStereoSE3ProjectXYZ* e = vpEdgesStereo[i];
-        MapPoint* pMP = vpMapPointEdgeStereo[i];
+        g2o::EdgeRGBDSE3ProjectXYZ* e = vpEdgesRGBD[i];
+        MapPoint* pMP = vpMapPointEdgeRGBD[i];
 
         if(pMP->isBad())
             continue;
 
         if(e->chi2()>7.815 || !e->isDepthPositive())
         {
-            KeyFrame* pKFi = vpEdgeKFStereo[i];
+            KeyFrame* pKFi = vpEdgeKFRGBD[i];
             vToErase.push_back(make_pair(pKFi,pMP));
         }
     }
