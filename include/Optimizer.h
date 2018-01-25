@@ -40,9 +40,20 @@ public:
     void static BundleAdjustment(const std::vector<KeyFrame*> &vpKF, const std::vector<MapPoint*> &vpMP,
                                  int nIterations = 5, bool *pbStopFlag=NULL, const unsigned long nLoopKF=0,
                                  const bool bRobust = true);
+
+    // bundle adjustment for RGB-D Camera minimizing both the reprojection error and inverse depth error
+    void static BundleAdjustmentRGBD(const std::vector<KeyFrame*> &vpKF, const std::vector<MapPoint*> &vpMP,
+                                 int nIterations = 5, bool *pbStopFlag=NULL, const unsigned long nLoopKF=0,
+                                 const bool bRobust = true);
+
     void static GlobalBundleAdjustemnt(Map* pMap, int nIterations=5, bool *pbStopFlag=NULL,
                                        const unsigned long nLoopKF=0, const bool bRobust = true);
-    void static LocalBundleAdjustment(KeyFrame* pKF, bool *pbStopFlag, Map *pMap);
+    void static LocalBundleAdjustment(KeyFrame* pKF, bool *pbStopFlag, Map *pMap);   
+
+    // Local bundle adjustment for RGB-D camera minimizing both the reprojection and inverse depth error
+    void static LocalBundleAdjustmentRGBD(KeyFrame* pKF, bool *pbStopFlag, Map *pMap);
+
+
     int static PoseOptimization(Frame* pFrame);
 
     int static PoseOptimizationRGBD(Frame* pFrame);
