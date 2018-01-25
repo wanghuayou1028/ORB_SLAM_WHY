@@ -137,6 +137,11 @@ public:
     std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
     std::vector<cv::KeyPoint> mvKeysUn;
 
+    // the dense points for optimizating the inverse depth error
+    std::vector<cv::Point2f> mvDensePoints;
+    std::vector<cv::Point2f> mvDensePointsUn;
+    std::vector<float> mvDenseDepth;
+
     // Corresponding stereo coordinate and depth for each keypoint.
     // "Monocular" keypoints have a negative value.
     std::vector<float> mvuRight;
@@ -194,6 +199,12 @@ private:
     // Only for the RGB-D case. Stereo must be already rectified!
     // (called in the constructor).
     void UndistortKeyPoints();
+
+    // Undistort dense points given OpenCV distortion parameters
+    // Only for the RGB-D case. Stereo must be already rectified!
+    // (called in the constructor).
+    // added by why
+    void UndistortDensePoints();
 
     // Computes image bounds for the undistorted image (called in the constructor).
     void ComputeImageBounds(const cv::Mat &imLeft);

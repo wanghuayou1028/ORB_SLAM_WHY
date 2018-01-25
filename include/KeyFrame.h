@@ -166,6 +166,11 @@ public:
     const std::vector<float> mvDepth; // negative value for monocular points
     const cv::Mat mDescriptors;
 
+    // the dense points for optimizating the inverse depth error
+    const std::vector<cv::Point2f> mvDensePoints;
+    const std::vector<cv::Point2f> mvDensePointsUn;
+    const std::vector<float> mvDenseDepth;
+
     //BoW
     DBoW2::BowVector mBowVec;
     DBoW2::FeatureVector mFeatVec;

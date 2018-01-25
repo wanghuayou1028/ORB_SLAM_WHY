@@ -132,6 +132,22 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     mvLevelSigma2 = mpORBextractorLeft->GetScaleSigmaSquares();
     mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
+    // dense points initialization
+    for(int i = 0; i < imGray.rows; i=i+10)
+    {
+        for(int j = 0; j < imGray.cols; j=j+10)
+        {
+            mvDensePoints.push_back(cv::Point2f(i,j));
+            unsigned int d = imDepth.ptr<unsigned short> ( i )[j]; // the depth value
+            if(d == 0 || d > 3) 
+                mvDenseDepth.push_back(-1);
+            else
+                mvDenseDepth.push_back(d);
+        }
+    }
+
+    UndistortDensePoints();    
+
     // ORB extraction
     ExtractORB(0,imGray);
 
@@ -430,6 +446,40 @@ void Frame::UndistortKeyPoints()
         kp.pt.x=mat.at<float>(i,0);
         kp.pt.y=mat.at<float>(i,1);
         mvKeysUn[i]=kp;
+    }
+}
+
+// for undistorting dense points
+void Frame::UndistortDensePoints()
+{
+    if(mDistCoef.at<float>(0)==0.0)
+    {
+        mvDensePointsUn = mvDensePoints;
+        return;
+    }
+
+    // Fill matrix with points
+    int Num = mvDensePoints.size();
+    cv::Mat mat(Num,2,CV_32F);
+    for(int i=0; i<Num; i++)
+    {
+        mat.at<float>(i,0)=mvDensePoints[i].x;
+        mat.at<float>(i,1)=mvDensePoints[i].y;
+    }
+
+    // Undistort points
+    mat=mat.reshape(2);
+    cv::undistortPoints(mat,mat,mK,mDistCoef,cv::Mat(),mK);
+    mat=mat.reshape(1);
+
+    // Fill undistorted keypoint vector
+    mvDensePointsUn.resize(Num);
+    for(int i=0; i<Num; i++)
+    {
+        cv::Point2f pt_i = mvDensePoints[i];
+        pt_i.x=mat.at<float>(i,0);
+        pt_i.y=mat.at<float>(i,1);
+        mvDensePointsUn[i]=pt_i;
     }
 }
 
