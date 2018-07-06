@@ -153,10 +153,10 @@ void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
     mpLocalMapper=pLocalMapper;
 }
 
-void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
-{
-    mpLoopClosing=pLoopClosing;
-}
+// void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
+// {
+//     mpLoopClosing=pLoopClosing;
+// }
 
 void Tracking::SetViewer(Viewer *pViewer)
 {
@@ -305,11 +305,11 @@ void Tracking::Track()
                 CheckReplacedInLastFrame();
 
                 if(mVelocity.empty() || mCurrentFrame.mnId<mnLastRelocFrameId+2)
-                {
-                    bOK = TrackReferenceKeyFrame();
+                {   bOK = TrackReferenceKeyFrame();
                 }
                 else
-                {
+                
+                 {
                     bOK = TrackWithMotionModel();
                     if(!bOK)
                         bOK = TrackReferenceKeyFrame();
@@ -317,7 +317,8 @@ void Tracking::Track()
             }
             else
             {
-                bOK = Relocalization();
+                // bOK = Relocalization();
+                bOK = false;
             }
         }
         else
@@ -326,7 +327,8 @@ void Tracking::Track()
 
             if(mState==LOST)
             {
-                bOK = Relocalization();
+                // bOK = Relocalization();
+                bOK = false;
             }
             else
             {
@@ -363,7 +365,8 @@ void Tracking::Track()
                         vbOutMM = mCurrentFrame.mvbOutlier;
                         TcwMM = mCurrentFrame.mTcw.clone();
                     }
-                    bOKReloc = Relocalization();
+                    // bOKReloc = Relocalization();
+                    bOKReloc = false;
 
                     if(bOKMM && !bOKReloc)
                     {
@@ -1338,6 +1341,8 @@ void Tracking::UpdateLocalKeyFrames()
     }
 }
 
+/*
+
 bool Tracking::Relocalization()
 {
     // Compute Bag of Words Vector
@@ -1501,6 +1506,8 @@ bool Tracking::Relocalization()
 
 }
 
+*/
+
 void Tracking::Reset()
 {
 
@@ -1518,9 +1525,9 @@ void Tracking::Reset()
     cout << " done" << endl;
 
     // Reset Loop Closing
-    cout << "Reseting Loop Closing...";
-    mpLoopClosing->RequestReset();
-    cout << " done" << endl;
+    // cout << "Reseting Loop Closing...";
+    // mpLoopClosing->RequestReset();
+    // cout << " done" << endl;
 
     // Clear BoW Database
     cout << "Reseting Database...";

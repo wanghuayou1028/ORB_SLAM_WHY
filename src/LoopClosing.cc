@@ -18,6 +18,8 @@
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+
 #include "LoopClosing.h"
 
 #include "Sim3Solver.h"
@@ -774,3 +776,5 @@ bool LoopClosing::isFinished()
 
 
 } //namespace ORB_SLAM
+
+*/

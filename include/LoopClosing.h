@@ -18,6 +18,8 @@
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+
 #ifndef LOOPCLOSING_H
 #define LOOPCLOSING_H
 
@@ -149,3 +151,5 @@ protected:
 } //namespace ORB_SLAM
 
 #endif // LOOPCLOSING_H
+
+*/

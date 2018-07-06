@@ -29,7 +29,7 @@
 #include"FrameDrawer.h"
 #include"Map.h"
 #include"LocalMapping.h"
-#include"LoopClosing.h"
+// #include"LoopClosing.h"
 #include"Frame.h"
 #include "ORBVocabulary.h"
 #include"KeyFrameDatabase.h"
@@ -47,7 +47,7 @@ class Viewer;
 class FrameDrawer;
 class Map;
 class LocalMapping;
-class LoopClosing;
+// class LoopClosing;
 class System;
 
 class Tracking
@@ -63,7 +63,7 @@ public:
     cv::Mat GrabImageMonocular(const cv::Mat &im, const double &timestamp);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
-    void SetLoopClosing(LoopClosing* pLoopClosing);
+    // void SetLoopClosing(LoopClosing* pLoopClosing);
     void SetViewer(Viewer* pViewer);
 
     // Load new settings
@@ -132,7 +132,7 @@ protected:
     void UpdateLastFrame();
     bool TrackWithMotionModel();
 
-    bool Relocalization();
+    // bool Relocalization();
 
     void UpdateLocalMap();
     void UpdateLocalPoints();
@@ -152,7 +152,7 @@ protected:
 
     //Other Thread Pointers
     LocalMapping* mpLocalMapper;
-    LoopClosing* mpLoopClosing;
+    // LoopClosing* mpLoopClosing;
 
     //ORB
     ORBextractor* mpORBextractorLeft, *mpORBextractorRight;

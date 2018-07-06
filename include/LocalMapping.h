@@ -23,7 +23,7 @@
 
 #include "KeyFrame.h"
 #include "Map.h"
-#include "LoopClosing.h"
+// #include "LoopClosing.h"
 #include "Tracking.h"
 #include "KeyFrameDatabase.h"
 
@@ -34,7 +34,7 @@ namespace ORB_SLAM2
 {
 
 class Tracking;
-class LoopClosing;
+// class LoopClosing;
 class Map;
 
 class LocalMapping
@@ -42,7 +42,7 @@ class LocalMapping
 public:
     LocalMapping(Map* pMap, const float bMonocular);
 
-    void SetLoopCloser(LoopClosing* pLoopCloser);
+    // void SetLoopCloser(LoopClosing* pLoopCloser);
 
     void SetTracker(Tracking* pTracker);
 
@@ -101,7 +101,7 @@ protected:
 
     Map* mpMap;
 
-    LoopClosing* mpLoopCloser;
+    // LoopClosing* mpLoopCloser;
     Tracking* mpTracker;
 
     std::list<KeyFrame*> mlNewKeyFrames;
