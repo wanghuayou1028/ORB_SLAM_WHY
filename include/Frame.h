@@ -29,11 +29,16 @@
 #include "ORBVocabulary.h"
 #include "KeyFrame.h"
 #include "ORBextractor.h"
+#include "feature.h"
 
 #include <opencv2/opencv.hpp>
 
 namespace ORB_SLAM2
 {
+
+typedef list<Feature*> Features; // store fast features extracted from the frame 
+typedef vector<cv::Mat> ImgPyr; // image pyramid of the frame
+
 #define FRAME_GRID_ROWS 48
 #define FRAME_GRID_COLS 64
 

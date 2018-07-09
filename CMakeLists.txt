@@ -77,7 +77,7 @@ src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
 src/Config.cc
-#src/feature_detection.cc
+src/feature_detection.cc
 )
 
 target_link_libraries(${PROJECT_NAME}
