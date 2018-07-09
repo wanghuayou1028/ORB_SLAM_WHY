@@ -38,12 +38,20 @@ endif()
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
+find_package(Sophus REQUIRED)
+find_package(fast REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread system)
+find_package(vikit_common REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
+${Sophus_INCLUDE_DIRS}
+${fast_INCLUDE_DIRS}
+${Boost_INCLUDE_DIRS}
+${vikit_common_INCLUDE_DIRS}
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -68,11 +76,17 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
+src/Config.cc
+#src/feature_detection.cc
 )
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
+${Sophus_LIBRARIES}
+${fast_LIBRARIES}
+${Boost_LIBRARIES}
+${vikit_common_LIBRARIES}
 ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
