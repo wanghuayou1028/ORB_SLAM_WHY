@@ -30,6 +30,12 @@
 #include "KeyFrame.h"
 #include "ORBextractor.h"
 #include "feature.h"
+#include <sophus/se3.h>
+#include <list>
+#include <vector>
+#include <vikit/math_utils.h>
+#include <vikit/abstract_camera.h>
+#include <global.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -61,6 +67,12 @@ public:
 
     // Constructor for Monocular cameras.
     Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
+
+    // Constructor for Monocular cameras without feature detection and descriptor computation
+    Frame(const cv::Mat &imGray, const double &timeStamp, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
+
+    // deconstructor
+    ~Frame();
 
     // Extract ORB on the image. 0 for left image and 1 for right image.
     void ExtractORB(int flag, const cv::Mat &im);
@@ -103,7 +115,29 @@ public:
     // Backprojects a keypoint (if stereo/depth info available) into 3D world coordinates.
     cv::Mat UnprojectStereo(const int &i);
 
+
+    /***************************** for direct tracking ***********************************/
+    
+    /// Initialize new frame and create image pyramid.
+    void initFrame(const cv::Mat& img);
+
+    /// Return number of point observations.
+    inline size_t nObs() const { return fts_.size(); }
+
+    /// Full resolution image stored in the frame.
+    inline const cv::Mat& img() const { return img_pyr_[0]; }
+
+
+    /***************************** for direct tracking ***********************************/
+
+
 public:
+    /***************************** for direct tracking ***********************************/
+    ImgPyr                        img_pyr_;               //!< Image Pyramid.
+    Features                      fts_;                   //!< List of features in the image.
+
+    /***************************** for direct tracking ***********************************/
+
     // Vocabulary used for relocalization.
     ORBVocabulary* mpORBvocabulary;
 
@@ -212,6 +246,17 @@ private:
     cv::Mat mRwc;
     cv::Mat mOw; //==mtwc
 };
+
+/// Some helper functions for the frame object.
+namespace frame_utils {
+
+/// Creates an image pyramid of half-sampled images.
+void createImgPyramid(const cv::Mat& img_level_0, int n_levels, ImgPyr& pyr);
+
+/// Get the average depth of the features in the image.
+// bool getSceneDepth(const Frame& frame, double& depth_mean, double& depth_min);
+
+} // namespace frame_utils
 
 }// namespace ORB_SLAM
 

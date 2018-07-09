@@ -22,6 +22,15 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
+#include <stdexcept>
+#include <feature.h>
+// #include <point.h>
+#include <Config.h>
+#include <boost/bind.hpp>
+#include <vikit/math_utils.h>
+#include <vikit/vision.h>
+#include <vikit/performance_monitor.h>
+#include <fast/fast.h>
 
 namespace ORB_SLAM2
 {
@@ -226,6 +235,68 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
 
     AssignFeaturesToGrid();
 }
+
+/****************************************************************************************/
+
+// Constructor for Monocular cameras without feature detection and descriptor computation
+Frame::Frame(const cv::Mat &imGray, const double &timeStamp, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
+    :mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
+{
+    // Frame ID
+    mnId=nNextId++;
+
+    // Scale Level Info
+    mnScaleLevels = mpORBextractorLeft->GetLevels();
+    mfScaleFactor = mpORBextractorLeft->GetScaleFactor();
+    mfLogScaleFactor = log(mfScaleFactor);
+    mvScaleFactors = mpORBextractorLeft->GetScaleFactors();
+    mvInvScaleFactors = mpORBextractorLeft->GetInverseScaleFactors();
+    mvLevelSigma2 = mpORBextractorLeft->GetScaleSigmaSquares();
+    mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
+
+    // This is done only for the first Frame (or after a change in the calibration)
+    if(mbInitialComputations)
+    {
+        ComputeImageBounds(imGray);
+
+        mfGridElementWidthInv=static_cast<float>(FRAME_GRID_COLS)/static_cast<float>(mnMaxX-mnMinX);
+        mfGridElementHeightInv=static_cast<float>(FRAME_GRID_ROWS)/static_cast<float>(mnMaxY-mnMinY);
+
+        fx = K.at<float>(0,0);
+        fy = K.at<float>(1,1);
+        cx = K.at<float>(0,2);
+        cy = K.at<float>(1,2);
+        invfx = 1.0f/fx;
+        invfy = 1.0f/fy;
+
+        mbInitialComputations=false;
+    }
+
+    mb = mbf/fx;
+
+    initFrame(imGray);
+}
+
+// deconstructor
+Frame::~Frame()
+{
+    std::for_each(fts_.begin(), fts_.end(), [&](Feature* i){delete i;});
+}
+
+void Frame::initFrame(const cv::Mat& img)
+{
+  // check image
+  if(img.empty() || img.type() != CV_8UC1 )
+    throw std::runtime_error("Frame: does not have image or image is not grayscale");
+
+  // Set keypoints to NULL
+  // std::for_each(key_pts_.begin(), key_pts_.end(), [&](Feature* ftr){ ftr=NULL; });
+
+  // Build Image Pyramid
+  frame_utils::createImgPyramid(img, 5, img_pyr_);
+}
+
+/***************************************************************************************/
 
 void Frame::AssignFeaturesToGrid()
 {
@@ -678,5 +749,45 @@ cv::Mat Frame::UnprojectStereo(const int &i)
     else
         return cv::Mat();
 }
+
+/// Utility functions for the Frame class
+namespace frame_utils {
+
+void createImgPyramid(const cv::Mat& img_level_0, int n_levels, ImgPyr& pyr)
+{
+  pyr.resize(n_levels);
+  pyr[0] = img_level_0;
+  for(int i=1; i<n_levels; ++i)
+  {
+    pyr[i] = cv::Mat(pyr[i-1].rows/2, pyr[i-1].cols/2, CV_8U);
+    vk::halfSample(pyr[i-1], pyr[i]);
+  }
+}
+
+// bool getSceneDepth(const Frame& frame, double& depth_mean, double& depth_min)
+// {
+//   vector<double> depth_vec;
+//   depth_vec.reserve(frame.fts_.size());
+//   depth_min = std::numeric_limits<double>::max();
+//   for(auto it=frame.fts_.begin(), ite=frame.fts_.end(); it!=ite; ++it)
+//   {
+//     if((*it)->point != NULL)
+//     {
+//       const double z = frame.w2f((*it)->point->pos_).z();
+//       depth_vec.push_back(z);
+//       depth_min = fmin(z, depth_min);
+//     }
+//   }
+//   if(depth_vec.empty())
+//   {
+//     CFD_WARN_STREAM("Cannot set scene depth. Frame has no point-observations!");
+//     return false;
+//   }
+//   depth_mean = vk::getMedian(depth_vec);
+//   return true;
+// }
+
+} // namespace frame_utils
+
 
 } //namespace ORB_SLAM
