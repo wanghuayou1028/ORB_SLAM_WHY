@@ -245,15 +245,6 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, cv::Mat &K, cv::Mat
     // Frame ID
     mnId=nNextId++;
 
-    // Scale Level Info
-    mnScaleLevels = mpORBextractorLeft->GetLevels();
-    mfScaleFactor = mpORBextractorLeft->GetScaleFactor();
-    mfLogScaleFactor = log(mfScaleFactor);
-    mvScaleFactors = mpORBextractorLeft->GetScaleFactors();
-    mvInvScaleFactors = mpORBextractorLeft->GetInverseScaleFactors();
-    mvLevelSigma2 = mpORBextractorLeft->GetScaleSigmaSquares();
-    mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
-
     // This is done only for the first Frame (or after a change in the calibration)
     if(mbInitialComputations)
     {
