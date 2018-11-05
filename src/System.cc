@@ -313,6 +313,9 @@ void System::Shutdown()
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
     {
         usleep(5000);
+
+        delete mpViewer;
+        mpViewer = static_cast<Viewer*>(NULL);
     }
 
     if(mpViewer)
