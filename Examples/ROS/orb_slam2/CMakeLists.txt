@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(orb_slam2)
 
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-
+$ set ROS_BUILD_TYPE
 IF(NOT ROS_BUILD_TYPE)
   SET(ROS_BUILD_TYPE Release)
 ENDIF()
@@ -28,8 +27,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package( OpenCV REQUIRED )
-
-
 find_package( Eigen3 REQUIRED )
 find_package( Pangolin REQUIRED )
 
@@ -37,6 +34,7 @@ include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/../../../
 ${PROJECT_SOURCE_DIR}/../../../include
+${OpenCV_INCLUDE_DIRS}
 ${Pangolin_INCLUDE_DIRS}
 )
 
