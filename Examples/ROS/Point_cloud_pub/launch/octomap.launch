@@ -5,7 +5,7 @@
     <param name="resolution" value="0.1" />
 
     <!-- name of the fixed frame, needs to be "/map" for SLAM -->
-    <param name="frame_id" type="string" value="/camera_rgb_frame" />
+    <param name="frame_id" type="string" value="/zed_cemter" />
 
     <!-- max range / depth resolution of the kinect in meter -->
     <param name="sensor_model/max_range" value="50.0" />
@@ -16,7 +16,7 @@
     <param name="pointcloud_min_z" value="0" />
 
     <!-- topic from where pointcloud2 messages are subscribed -->
-    <remap from="cloud_in" to="/orbslam2_with_kinect2/output" />
+    <remap from="cloud_in" to="/orbslam2/output/pointcloud" />
 
   </node>
 </launch>

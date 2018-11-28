@@ -41,6 +41,9 @@
 
 using namespace std;
 
+pcl::PointCloud<pcl::PointXYZRGB> cloud;  
+sensor_msgs::PointCloud2 output;
+
 class ImageGrabber
 {
 public:
@@ -70,14 +73,23 @@ int main(int argc, char **argv)
  
     ros::NodeHandle nh;
 
-    // ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("/orbslam2_with_kinect2/output", 10); 
+//    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("/orbslam2/output/pointcloud", 10); 
 
     message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/zed/rgb/image_rect_color", 1);
     message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/zed/depth/depth_registered", 1);
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
- 
+
+//    pcl::io::loadPCDFile ("/home/nvidia/SLAM/project/slam_ws/PointCloud.pcd", cloud);  
+//    // cloud = mpSLAM->mpPointCloudMapper->get_globalPointCloudMap();
+//    pcl::toROSMsg(cloud,output);// transfer to ROS data type
+//  
+//    output.header.stamp=ros::Time::now();
+//    output.header.frame_id  ="camera_rgb_frame";
+//    
+//    pcl_pub.publish(output);  
+    
     ros::spin();
 
     // Stop all threads
@@ -123,21 +135,6 @@ void ImageGrabber::GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const senso
     }
     
     mpSLAM->TrackRGBD(cv_ptrRGB->image,cv_ptrD->image,cv_ptrRGB->header.stamp.toSec());
-
-    // pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;  
-    // sensor_msgs::PointCloud2 output;
-
-    // cloud = mpSLAM->mpPointCloudMapper->get_globalPointCloudMap();
-    // // pcl::io::loadPCDFile ("/home/why/SLAM/demo/orbslam2_ws/PointCloud.pcd", cloud);  
-        
-    // cout << "The size of cloud: " << cloud->points.size() << endl;
-    
-    // pcl::toROSMsg(*cloud,output);// transfer to ROS data type
-        
-    // output.header.stamp=ros::Time::now();
-    // output.header.frame_id  ="camera_rgb_frame";
-      
-    // pcl_pub.publish(output);
 }
 
 

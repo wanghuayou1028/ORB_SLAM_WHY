@@ -13,7 +13,7 @@ int main (int argc, char **argv)
 {  
   ros::init (argc, argv, "orbslam");  
   ros::NodeHandle nh;  
-  ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("/orbslam2_with_kinect2/output", 10);  
+  ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("/orbslam2/output/pointcloud", 10);  
 
   // pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;  
   pcl::PointCloud<pcl::PointXYZRGB> cloud;  
@@ -28,7 +28,7 @@ int main (int argc, char **argv)
   ros::Rate loop_rate(1);  
   while (ros::ok())  
   {  
-    pcl::io::loadPCDFile ("/home/why/SLAM/demo/orbslam2_ws/PointCloud.pcd", cloud);  
+    pcl::io::loadPCDFile ("/home/nvidia/SLAM/project/slam_ws/PointCloud.pcd", cloud);  
     pcl::toROSMsg(cloud,output);// transfer to ROS data type
   
     output.header.stamp=ros::Time::now();
