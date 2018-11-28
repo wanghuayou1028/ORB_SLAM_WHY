@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(orb_slam2)
 
-$ set ROS_BUILD_TYPE
+## set ROS_BUILD_TYPE
 IF(NOT ROS_BUILD_TYPE)
   SET(ROS_BUILD_TYPE Release)
 ENDIF()

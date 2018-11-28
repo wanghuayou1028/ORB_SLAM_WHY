@@ -1,0 +1,8 @@
+Monocular:
+	rosrun orb_slam2 Mono src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
+
+Stereo:
+	rosrun orb_slam2 Stereo src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
+
+RGB-D:
+	rosrun orb_slam2 RGBD src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_RGBD.yaml
