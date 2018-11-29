@@ -41,8 +41,8 @@
 
 using namespace std;
 
-pcl::PointCloud<pcl::PointXYZRGB> cloud;  
-sensor_msgs::PointCloud2 output;
+//pcl::PointCloud<pcl::PointXYZRGB> cloud;  
+//sensor_msgs::PointCloud2 output;
 
 class ImageGrabber
 {
@@ -57,7 +57,7 @@ public:
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "RGBD");
-    ros::start();
+//    ros::start();
 
     if(argc != 3)
     {

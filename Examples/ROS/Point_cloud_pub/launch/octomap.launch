@@ -5,7 +5,7 @@
     <param name="resolution" value="0.1" />
 
     <!-- name of the fixed frame, needs to be "/map" for SLAM -->
-    <param name="frame_id" type="string" value="/zed_cemter" />
+    <param name="frame_id" type="string" value="/zed_center" />
 
     <!-- max range / depth resolution of the kinect in meter -->
     <param name="sensor_model/max_range" value="50.0" />

@@ -1,8 +1,20 @@
-Monocular:
+ZED:
+roslaunch zed_wrapper zed.launch
+
+ROS-Monocular:
 	rosrun orb_slam2 Mono src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
 
-Stereo:
+ROS-Stereo:
 	rosrun orb_slam2 Stereo src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
 
-RGB-D:
+ROS-RGB-D:
 	rosrun orb_slam2 RGBD src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_RGBD.yaml
+
+Pointcloud Publish:
+    rosrun point_cloud_pub point_cloud_pub
+    
+OctoMap Publish:
+    roslaunch point_cloud_pub octomap.launch
+    
+
+

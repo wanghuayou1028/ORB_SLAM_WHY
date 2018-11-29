@@ -12,6 +12,7 @@
 int main (int argc, char **argv)  
 {  
   ros::init (argc, argv, "orbslam");  
+  
   ros::NodeHandle nh;  
   ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("/orbslam2/output/pointcloud", 10);  
 
@@ -32,7 +33,7 @@ int main (int argc, char **argv)
     pcl::toROSMsg(cloud,output);// transfer to ROS data type
   
     output.header.stamp=ros::Time::now();
-    output.header.frame_id  ="camera_rgb_frame";
+    output.header.frame_id  ="zed_center";
 
     pcl_pub.publish(output);  
     ros::spinOnce();  
