@@ -535,6 +535,13 @@ void System::SaveOctoMap(const string &filename)
 
 }
 
+void System::SaveMap(const string &filename)
+{
+    cout << "Saving Map ... " << endl;
+    mpMap->Save(filename);
+    cout << "The Map is saved!" << endl;
+}
+
 int System::GetTrackingState()
 {
     unique_lock<mutex> lock(mMutexState);

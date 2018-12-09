@@ -21,6 +21,7 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include "Converter.h"
 #include "MapPoint.h"
 #include "KeyFrame.h"
 #include <set>
@@ -65,8 +66,15 @@ public:
 
     // This avoid that two points are created simultaneously in separate threads (id conflict)
     std::mutex mMutexPointCreation;
+    
+    void Save(const string &filename);
 
 protected:
+    void SaveMapPoint(ofstream &f, MapPoint* mp);
+    void SaveKeyFrame(ofstream & f, KeyFrame* kf);
+    std::map<MapPoint*, unsigned long int> mmpnMapPointsIdx;
+    void GetMapPointsIdx();
+    
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
 

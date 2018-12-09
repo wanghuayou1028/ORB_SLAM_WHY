@@ -147,5 +147,17 @@ std::vector<float> Converter::toQuaternion(const cv::Mat &M)
 
     return v;
 }
+ 
+cv::Mat Converter::toCvMat( const std::vector<float>& v )
+{
+    Eigen::Quaterniond q;
+    q.x()  = v[0];
+    q.y()  = v[1];
+    q.z()  = v[2];
+    q.w()  = v[3];
+    Eigen::Matrix<double,3,3>eigMat(q);
+    cv::Mat M = toCvMat(eigMat);
+    return M;
+}
 
 } //namespace ORB_SLAM

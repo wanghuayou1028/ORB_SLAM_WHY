@@ -128,6 +128,8 @@ public:
     // Save Octomap
     void SaveOctoMap(const string &filename);
     
+    // Save Map
+    void SaveMap(const string &filename);
 
     // TODO: Save/Load functions
     // SaveMap(const string &filename);
