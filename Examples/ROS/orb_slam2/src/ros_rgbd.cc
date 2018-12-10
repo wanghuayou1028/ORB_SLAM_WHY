@@ -103,7 +103,9 @@ int main(int argc, char **argv)
     
     // Save OctoMap
     SLAM.SaveOctoMap("OctoMap.bt");
-
+    
+    // Save Map
+    SLAM.SaveMap("Map.bin"); 
     ros::shutdown();
 
     return 0;

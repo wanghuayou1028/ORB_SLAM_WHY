@@ -1,14 +1,39 @@
+
+Monocular Examples:
+TUM Dataset:
+./Examples/Monocular/mono_tum Vocabulary/ORBvoc.txt Examples/Monocular/TUMX.yaml PATH_TO_SEQUENCE_FOLDER
+
+KITTI Dataset:
+./Examples/Monocular/mono_kitti Vocabulary/ORBvoc.txt Examples/Monocular/KITTIX.yaml PATH_TO_DATASET_FOLDER/dataset/sequences/SEQUENCE_NUMBER
+
+EuRoC Dataset:
+./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml PATH_TO_SEQUENCE_FOLDER/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/SEQUENCE.txt 
+./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml PATH_TO_SEQUENCE/cam0/data Examples/Monocular/EuRoC_TimeStamps/SEQUENCE.txt 
+
+Stereo Examples:
+KITTI Dataset:
+./Examples/Stereo/stereo_kitti Vocabulary/ORBvoc.txt Examples/Stereo/KITTIX.yaml PATH_TO_DATASET_FOLDER/dataset/sequences/SEQUENCE_NUMBER
+
+EuRoC Dataset:
+./Examples/Stereo/stereo_euroc Vocabulary/ORBvoc.txt Examples/Stereo/EuRoC.yaml PATH_TO_SEQUENCE/mav0/cam0/data PATH_TO_SEQUENCE/mav0/cam1/data Examples/Stereo/EuRoC_TimeStamps/SEQUENCE.txt
+./Examples/Stereo/stereo_euroc Vocabulary/ORBvoc.txt Examples/Stereo/EuRoC.yaml PATH_TO_SEQUENCE/cam0/data PATH_TO_SEQUENCE/cam1/data Examples/Stereo/EuRoC_TimeStamps/SEQUENCE.txt
+
+RGB-D Example:
+TUM Dataset:
+python associate.py PATH_TO_SEQUENCE/rgb.txt PATH_TO_SEQUENCE/depth.txt > associations.txt
+./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUMX.yaml PATH_TO_SEQUENCE_FOLDER ASSOCIATIONS_FILE
+
 ZED:
 roslaunch zed_wrapper zed.launch
 
 ROS-Monocular:
-	rosrun orb_slam2 Mono src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
+	rosrun orb_slam2 Mono src/ORB_SLAM_WHY/Vocabulary/ORBvoc.bin src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
 
 ROS-Stereo:
-	rosrun orb_slam2 Stereo src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
+	rosrun orb_slam2 Stereo src/ORB_SLAM_WHY/Vocabulary/ORBvoc.bin src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_left.yaml
 
 ROS-RGB-D:
-	rosrun orb_slam2 RGBD src/ORB_SLAM_WHY/Vocabulary/ORBvoc.txt src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_RGBD.yaml
+	rosrun orb_slam2 RGBD src/ORB_SLAM_WHY/Vocabulary/ORBvoc.bin src/ORB_SLAM_WHY/Examples/ROS/orb_slam2/zed_RGBD.yaml
 
 Pointcloud Publish:
     rosrun point_cloud_pub point_cloud_pub

@@ -139,7 +139,7 @@ void Map::Save(const string &filename)
     
     //地图点的数目
     unsigned long int nMapPoints = mspMapPoints.size();
-    f.write((char*)&nMapPoints, sizeof(nMapPoints)):
+    f.write((char*)&nMapPoints, sizeof(nMapPoints));
     //依次保存MapPoints
     for ( auto mp: mspMapPoints )
         SaveMapPoint( f, mp );
