@@ -98,6 +98,16 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     // mpPointCloudDrawer = new PointCloudDrawer();
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
+    mySettingsFile = strSettingsFile;
+    cout << "Do you want to load the map?(Y/N)" << endl;
+    cin >> IsLoadMap;
+    if(IsLoadMap == 'y' || IsLoadMap == 'Y')
+    {
+        cout << "Input the Map path: " << endl;
+        cin >> MapPath;
+        LoadMap(MapPath);
+    }
+
     // // Initialize pointcloud mapping
     // mpPointCloudMapping = make_shared<PointCloudMapping>(strSettingsFile);
 
@@ -541,6 +551,15 @@ void System::SaveMap(const string &filename)
     mpMap->Save(filename);
     cout << "The Map is saved!" << endl;
 }
+
+void System::LoadMap(const string &filename)  
+{  
+    cout << "Map is loading ... " << endl;
+    SystemSetting *mySystemSetting = new SystemSetting(mpVocabulary);
+    mySystemSetting->LoadSystemSetting(mySettingsFile);
+    mpMap->Load(filename, mySystemSetting);
+    cout << "The Map is loaded, it can be used for relocalization!" << endl;   
+} 
 
 int System::GetTrackingState()
 {

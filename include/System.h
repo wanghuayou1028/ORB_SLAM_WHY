@@ -43,6 +43,7 @@
 
 #include <octomap/octomap.h>
 #include <octomap/ColorOcTree.h>
+#include "SystemSetting.h"
 
 namespace ORB_SLAM2
 {
@@ -55,6 +56,7 @@ class Tracking;
 class LocalMapping;
 class PointCloudMapping;
 class LoopClosing;
+class SystemSetting;
 
 class System
 {
@@ -130,6 +132,8 @@ public:
     
     // Save Map
     void SaveMap(const string &filename);
+    // Load Map
+    void LoadMap(const string &filename);
 
     // TODO: Save/Load functions
     // SaveMap(const string &filename);
@@ -160,6 +164,8 @@ private:
 
     // Map structure that stores the pointers to all KeyFrames and MapPoints.
     Map* mpMap;
+
+    std::string mySettingsFile;
 
     // Tracker. It receives a frame and computes the associated camera pose.
     // It also decides when to insert a new keyframe, create some new MapPoints and
@@ -208,6 +214,8 @@ private:
 
     // point cloud mapping
     // shared_ptr<PointCloudMapping> mpPointCloudMapping;
+    char IsLoadMap;
+    std::string MapPath;
 };
 
 }// namespace ORB_SLAM
