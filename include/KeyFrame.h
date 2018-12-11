@@ -28,6 +28,7 @@
 #include "ORBextractor.h"
 #include "Frame.h"
 #include "KeyFrameDatabase.h"
+#include "InitKeyFrame.h"
 
 #include <mutex>
 
@@ -39,10 +40,13 @@ class Map;
 class MapPoint;
 class Frame;
 class KeyFrameDatabase;
+class InitKeyFrame;
 
 class KeyFrame
 {
 public:
+    // Constructor used for KeyFrame reload
+    KeyFrame(InitKeyFrame &initkf, Map* pMap, KeyFrameDatabase* pKFDB,vector< MapPoint*>& vpMapPoints);
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
 
     // Pose functions
