@@ -214,7 +214,8 @@ private:
 
     // point cloud mapping
     // shared_ptr<PointCloudMapping> mpPointCloudMapping;
-
+    char IsLoadMap;
+    std::string MapPath;
 };
 
 }// namespace ORB_SLAM

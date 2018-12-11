@@ -99,7 +99,14 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
     mySettingsFile = strSettingsFile;
-    LoadMap("Map.bin");
+    cout << "Do you want to load the map?(Y/N)" << endl;
+    cin >> IsLoadMap;
+    if(IsLoadMap == 'y' || IsLoadMap == 'Y')
+    {
+        cout << "Input the Map path: " << endl;
+        cin >> MapPath;
+        LoadMap(MapPath);
+    }
 
     // // Initialize pointcloud mapping
     // mpPointCloudMapping = make_shared<PointCloudMapping>(strSettingsFile);

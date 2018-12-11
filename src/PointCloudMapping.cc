@@ -127,8 +127,10 @@ void PointCloudMapping::Run()
             break;
     }
 
-    pcl::io::savePCDFileBinary("PointCloud.pcd", *globalPointCloudMap );
-    
+    if( globalPointCloudMap->points.size() != 0 )
+    {
+        pcl::io::savePCDFileBinary("PointCloud.pcd", *globalPointCloudMap );
+    }    
     SetFinish();
 }
 
