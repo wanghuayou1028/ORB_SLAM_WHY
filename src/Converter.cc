@@ -24,12 +24,14 @@
 namespace ORB_SLAM2
 {
 
+// 将描述子矩阵按行展开为一个向量
 std::vector<cv::Mat> Converter::toDescriptorVector(const cv::Mat &Descriptors)
 {
     std::vector<cv::Mat> vDesc;
+    // reserve(Container::size_type n)强制容器把它的容量capacity改为至少n，提供的n不小于当前大小。
     vDesc.reserve(Descriptors.rows);
     for (int j=0;j<Descriptors.rows;j++)
-        vDesc.push_back(Descriptors.row(j));
+        vDesc.push_back(Descriptors.row(j)); // 将矩阵Descriptors的每一行都push到vDesc向量中
 
     return vDesc;
 }

@@ -30,13 +30,15 @@
 namespace ORB_SLAM2
 {
 
+// 该类定义的函数是用来将cv::Mat, Eigen::Matrix<>, 和g2o::SE3Quat之间相互转换。
 class Converter
 {
 public:
+    // 函数的定义和声明默认情况下是extern的，但静态函数只是在声明他的文件当中可见，不能被其他文件所用。
     static std::vector<cv::Mat> toDescriptorVector(const cv::Mat &Descriptors);
 
     static g2o::SE3Quat toSE3Quat(const cv::Mat &cvT);
-    static g2o::SE3Quat toSE3Quat(const g2o::Sim3 &gSim3);
+    static g2o::SE3Quat toSE3Quat(const g2o::Sim3 &gSim3); // 这个函数没有定义，没有被使用
 
     static cv::Mat toCvMat(const g2o::SE3Quat &SE3);
     static cv::Mat toCvMat(const g2o::Sim3 &Sim3);
