@@ -79,7 +79,7 @@ public:
         return mRwc.clone();
     }
 
-    // Check if a MapPoint is in the frustum of the camera
+    // Check if a MapPoint is in the frustum（锥视体）of the camera
     // and fill variables of the MapPoint to be used by the tracking
     bool isInFrustum(MapPoint* pMP, float viewingCosLimit);
 
@@ -135,7 +135,7 @@ public:
     // In the stereo case, mvKeysUn is redundant as images must be rectified.
     // In the RGB-D case, RGB images can be distorted.
     std::vector<cv::KeyPoint> mvKeys, mvKeysRight;
-    std::vector<cv::KeyPoint> mvKeysUn;
+    std::vector<cv::KeyPoint> mvKeysUn; // 去畸变特征点
 
     // Corresponding stereo coordinate and depth for each keypoint.
     // "Monocular" keypoints have a negative value.
@@ -143,8 +143,8 @@ public:
     std::vector<float> mvDepth;
 
     // Bag of Words Vector structures.
-    DBoW2::BowVector mBowVec;
-    DBoW2::FeatureVector mFeatVec;
+    DBoW2::BowVector mBowVec; // 词袋向量结构
+    DBoW2::FeatureVector mFeatVec; // 特征向量
 
     // ORB descriptor, each row associated to a keypoint.
     cv::Mat mDescriptors, mDescriptorsRight;
@@ -168,10 +168,10 @@ public:
     long unsigned int mnId;
 
     // Reference Keyframe.
-    KeyFrame* mpReferenceKF;
+    KeyFrame* mpReferenceKF; // 参考关键帧
 
     // Scale pyramid info.
-    int mnScaleLevels;
+    int mnScaleLevels; // 多少层
     float mfScaleFactor;
     float mfLogScaleFactor;
     vector<float> mvScaleFactors;
@@ -185,7 +185,7 @@ public:
     static float mnMinY;
     static float mnMaxY;
 
-    static bool mbInitialComputations;
+    static bool mbInitialComputations; // 是否是初次计算，即初始化
 
 
 private:
@@ -205,7 +205,7 @@ private:
     cv::Mat mRcw;
     cv::Mat mtcw;
     cv::Mat mRwc;
-    cv::Mat mOw; //==mtwc
+    cv::Mat mOw; //==mtwc 相机中心在世界坐标系下的位置
 };
 
 }// namespace ORB_SLAM
