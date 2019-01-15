@@ -37,7 +37,10 @@
 namespace ORB_SLAM2
 {
 
-
+// pMap中所有的MapPoints和关键帧做bundle adjustment优化
+// 这个全局BA优化在本程序中有两个地方使用：
+// a.单目初始化：CreateInitialMapMonocular函数
+// b.闭环优化：RunGlobalBundleAdjustment函数
 void Optimizer::GlobalBundleAdjustemnt(Map* pMap, int nIterations, bool* pbStopFlag, const unsigned long nLoopKF, const bool bRobust)
 {
     vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
@@ -45,7 +48,27 @@ void Optimizer::GlobalBundleAdjustemnt(Map* pMap, int nIterations, bool* pbStopF
     BundleAdjustment(vpKFs,vpMP,nIterations,pbStopFlag, nLoopKF, bRobust);
 }
 
-
+/**
+ * @brief bundle adjustment Optimization
+ *
+ * 3D-2D 最小化重投影误差 e = (u,v) - project(Tcw*Pw) \n
+ *
+ * 1. Vertex: g2o::VertexSE3Expmap()，即当前帧的Tcw
+ *            g2o::VertexSBAPointXYZ()，MapPoint的mWorldPos
+ * 2. Edge:
+ *     - g2o::EdgeSE3ProjectXYZ()，BaseBinaryEdge
+ *         + Vertex：待优化当前帧的Tcw
+ *         + Vertex：待优化MapPoint的mWorldPos
+ *         + measurement：MapPoint在当前帧中的二维位置(u,v)
+ *         + InfoMatrix: invSigma2(与特征点所在的尺度有关)
+ *
+ * @param   vpKFs    关键帧
+ *          vpMP     MapPoints
+ *          nIterations 迭代次数（20次）
+ *          pbStopFlag  是否强制暂停
+ *          nLoopKF  闭环关键帧的个数
+ *          bRobust  是否使用核函数
+ */
 void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<MapPoint *> &vpMP,
                                  int nIterations, bool* pbStopFlag, const unsigned long nLoopKF, const bool bRobust)
 {
@@ -55,10 +78,13 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
     g2o::SparseOptimizer optimizer;
     g2o::BlockSolver_6_3::LinearSolverType * linearSolver;
 
+    // 定义一个线性方程求解器
     linearSolver = new g2o::LinearSolverEigen<g2o::BlockSolver_6_3::PoseMatrixType>();
 
+    // 稀疏矩阵块求解器
     g2o::BlockSolver_6_3 * solver_ptr = new g2o::BlockSolver_6_3(linearSolver);
 
+    // 定义使用LM算法进行求解
     g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
     optimizer.setAlgorithm(solver);
 
@@ -82,6 +108,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
             maxKFid=pKF->mnId;
     }
 
+    // 卡方分布的经验值
     const float thHuber2D = sqrt(5.99);
     const float thHuber3D = sqrt(7.815);
 
@@ -95,7 +122,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
         vPoint->setEstimate(Converter::toVector3d(pMP->GetWorldPos()));
         const int id = pMP->mnId+maxKFid+1;
         vPoint->setId(id);
-        vPoint->setMarginalized(true);
+        vPoint->setMarginalized(true); // 对地图点进行边缘化，即先计算关键帧位姿，然后再计算特征点位置
         optimizer.addVertex(vPoint);
 
        const map<KeyFrame*,size_t> observations = pMP->GetObservations();
@@ -113,7 +140,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
 
             const cv::KeyPoint &kpUn = pKF->mvKeysUn[mit->second];
 
-            if(pKF->mvuRight[mit->second]<0)
+            if(pKF->mvuRight[mit->second]<0)  // 单目
             {
                 Eigen::Matrix<double,2,1> obs;
                 obs << kpUn.pt.x, kpUn.pt.y;
@@ -124,9 +151,9 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
                 e->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(pKF->mnId)));
                 e->setMeasurement(obs);
                 const float &invSigma2 = pKF->mvInvLevelSigma2[kpUn.octave];
-                e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
+                e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);  // 信息矩阵是与尺度相关的
 
-                if(bRobust)
+                if(bRobust)  // 如果使用鲁棒核函数
                 {
                     g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
                     e->setRobustKernel(rk);
@@ -236,6 +263,8 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
 
 }
 
+// 只优化当前帧的pose，地图点固定
+// 用于LocalTracking中运动模型跟踪，参考帧跟踪，地图跟踪TrackLocalMap,重定位
 int Optimizer::PoseOptimization(Frame *pFrame)
 {
     g2o::SparseOptimizer optimizer;
@@ -780,7 +809,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
     }
 }
 
-
+// 优化本质图
+// EssentialGraph包括所有的关键帧顶点，但是优化的边大大减少，包括spanning tree，共识权重，以及闭环连接边
 void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* pCurKF,
                                        const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
                                        const LoopClosing::KeyFrameAndPose &CorrectedSim3,
@@ -1046,6 +1076,8 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
     }
 }
 
+// 在用RANSAC求解过Sim3，以及通过Sim3匹配更多的地图点后，对当前关键帧，闭环关键帧，
+// 以及匹配的地图点进行优化，获得更准确的Sim3位姿，再去下一步的闭环调整。
 int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &vpMatches1, g2o::Sim3 &g2oS12, const float th2, const bool bFixScale)
 {
     g2o::SparseOptimizer optimizer;
