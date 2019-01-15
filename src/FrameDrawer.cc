@@ -79,7 +79,7 @@ cv::Mat FrameDrawer::DrawFrame()
         }
     } // destroy scoped mutex -> release mutex
 
-    if(im.channels()<3) //this should be always true
+    if(im.channels()<3) //this should be always true 灰度图像
         cvtColor(im,im,CV_GRAY2BGR); // 将灰度图像转化为BGR图像
 
     //Draw
