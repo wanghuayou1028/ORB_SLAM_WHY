@@ -93,33 +93,36 @@ protected:
     bool mbResetRequested;
     std::mutex mMutexReset;
 
-    bool CheckFinish();
+    bool CheckFinish();  // 检查是否已经请求完成局部建图
     void SetFinish();
-    bool mbFinishRequested;
-    bool mbFinished;
+    bool mbFinishRequested; // 是否请求完成标志位
+    bool mbFinished; // 是否完成标志位
     std::mutex mMutexFinish;
 
     Map* mpMap;
 
-    LoopClosing* mpLoopCloser;
-    Tracking* mpTracker;
+    LoopClosing* mpLoopCloser; //利用对应的Set赋值函数进行赋值
+    Tracking* mpTracker; //利用对应的Set赋值函数进行赋值
 
-    std::list<KeyFrame*> mlNewKeyFrames;
+    // Tracking线程向LocalMapping中插入关键帧是先插入到该队列中
+    std::list<KeyFrame*> mlNewKeyFrames; // 等待处理的关键帧列表
 
-    KeyFrame* mpCurrentKeyFrame;
+    KeyFrame* mpCurrentKeyFrame; // 利用InsertKeyFrame函数进行赋值
 
+    //在处理ProcessNewKeyFrame函数中对这个变量进行赋值
+    // 该变量存储的是当前关键帧生成的地图点，应该是针对双目和RGBD相机为了更好的追踪而生成的地图点
     std::list<MapPoint*> mlpRecentAddedMapPoints;
 
     std::mutex mMutexNewKFs;
 
     bool mbAbortBA;
 
-    bool mbStopped;
-    bool mbStopRequested;
-    bool mbNotStop;
+    bool mbStopped; // 停止标志位
+    bool mbStopRequested; // 请求停止标志位
+    bool mbNotStop; // 不停止标志位
     std::mutex mMutexStop;
 
-    bool mbAcceptKeyFrames;
+    bool mbAcceptKeyFrames; // 判断局部地图线程是否接收关键帧标志位
     std::mutex mMutexAccept;
 };
 
