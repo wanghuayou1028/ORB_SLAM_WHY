@@ -31,6 +31,7 @@
 
 #include<mutex>
 
+// 关键帧数据库中存放的是每个词汇向量和与之对应的关键帧队列
 
 namespace ORB_SLAM2
 {
@@ -63,6 +64,8 @@ protected:
   const ORBVocabulary* mpVoc;
 
   // Inverted file
+  // 主要是后面应用倒排索引搜索候选关键帧
+  // 是一个向量，里面存放的是一个个单词，每个单词对应一个list链表，每个链表里存放的是拥有该单词的关键帧
   std::vector<list<KeyFrame*> > mvInvertedFile;
 
   // Mutex
