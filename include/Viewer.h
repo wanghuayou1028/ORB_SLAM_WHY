@@ -27,7 +27,7 @@
 #include "Tracking.h"
 #include "System.h"
 
-#include <mutex>
+#include <mutex> // 互斥锁有关的头文件
 
 namespace ORB_SLAM2
 {
@@ -67,7 +67,7 @@ private:
 
     // 1/fps in ms
     double mT;
-    float mImageWidth, mImageHeight;
+    float mImageWidth, mImageHeight; // 这两个成员变量没有用到
 
     float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
 
