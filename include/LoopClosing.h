@@ -112,12 +112,12 @@ protected:
 
     LocalMapping *mpLocalMapper;
 
-    std::list<KeyFrame*> mlpLoopKeyFrameQueue;
+    std::list<KeyFrame*> mlpLoopKeyFrameQueue; // 闭环检测队列，等待进行闭环检测的关键帧
 
     std::mutex mMutexLoopQueue;
 
     // Loop detector parameters
-    float mnCovisibilityConsistencyTh;
+    float mnCovisibilityConsistencyTh; // 表示共视一致性的阈值
 
     // Loop detector variables
     KeyFrame* mpCurrentKF;
@@ -130,7 +130,7 @@ protected:
     cv::Mat mScw;
     g2o::Sim3 mg2oScw;
 
-    long unsigned int mLastLoopKFid;
+    long unsigned int mLastLoopKFid;  // 上一个闭环关键帧的id
 
     // Variables related to Global Bundle Adjustment
     bool mbRunningGBA;
@@ -143,7 +143,7 @@ protected:
     bool mbFixScale;
 
 
-    bool mnFullBAIdx;
+    int mnFullBAIdx; // 这个变量赋值有问题，应该是int型,不应该是bool型，应该表示全局BA的执行次数
 };
 
 } //namespace ORB_SLAM
