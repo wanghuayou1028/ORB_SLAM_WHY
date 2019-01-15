@@ -33,7 +33,8 @@
 
 namespace ORB_SLAM2
 {
-
+// 该类负责特征点与特征点之间，地图点与特征点之间通过投影关系、词袋模型或者Sim3位姿匹配。
+// 用来辅助完成单目初始化，三角化恢复新的地图点，tracking,relocalization以及loop closing
 class ORBmatcher
 {    
 public:
@@ -66,9 +67,11 @@ public:
     int SearchByBoW(KeyFrame *pKF1, KeyFrame* pKF2, std::vector<MapPoint*> &vpMatches12);
 
     // Matching for the Map Initialization (only used in the monocular case)
+    // 单目需要自己初始化
     int SearchForInitialization(Frame &F1, Frame &F2, std::vector<cv::Point2f> &vbPrevMatched, std::vector<int> &vnMatches12, int windowSize=10);
 
     // Matching to triangulate new MapPoints. Check Epipolar Constraint.
+    // 通过基础矩阵检查两个关键帧之间的匹配，在局部建图线程用来生成地图点
     int SearchForTriangulation(KeyFrame *pKF1, KeyFrame* pKF2, cv::Mat F12,
                                std::vector<pair<size_t, size_t> > &vMatchedPairs, const bool bOnlyStereo);
 
@@ -97,7 +100,7 @@ protected:
 
     void ComputeThreeMaxima(std::vector<int>* histo, const int L, int &ind1, int &ind2, int &ind3);
 
-    float mfNNratio;
+    float mfNNratio; // 评价最好匹配时的比例参数
     bool mbCheckOrientation;
 };
 
