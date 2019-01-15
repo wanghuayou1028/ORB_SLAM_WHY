@@ -231,7 +231,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
 // 将所有的特征点分配到到每一个栅格中
 void Frame::AssignFeaturesToGrid()
 {
-    int nReserve = 0.5f*N/(FRAME_GRID_COLS*FRAME_GRID_ROWS);
+    int nReserve = 0.5f*N/(FRAME_GRID_COLS*FRAME_GRID_ROWS); // N: Number of KeyPoints.
     for(unsigned int i=0; i<FRAME_GRID_COLS;i++)
         for (unsigned int j=0; j<FRAME_GRID_ROWS;j++)
             mGrid[i][j].reserve(nReserve); // 每个栅格中保存这么多的容量
