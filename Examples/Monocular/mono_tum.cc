@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 {
     if(argc != 4)
     {
+        // 一共四个参数：可执行文件argv[0],字典目录argv[1],配置的路径argv[2],图片序列的路径argv[3]
         cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
     }
@@ -45,16 +46,17 @@ int main(int argc, char **argv)
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
     string strFile = string(argv[3])+"/rgb.txt";
-    LoadImages(strFile, vstrImageFilenames, vTimestamps);
+    LoadImages(strFile, vstrImageFilenames, vTimestamps); //加载图片，传入图片路径、传回的是图片的文件名，每幅图像的时间戳
 
-    int nImages = vstrImageFilenames.size();
+    int nImages = vstrImageFilenames.size(); //图片个数
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    // 对SLAM系统进行初始化，传入字典和配置的路径
     ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
-    vTimesTrack.resize(nImages);
+    vTimesTrack.resize(nImages); //计算追踪所花的时间变量
 
     cout << endl << "-------" << endl;
     cout << "Start processing sequence ..." << endl;
@@ -76,13 +78,15 @@ int main(int argc, char **argv)
         }
 
 #ifdef COMPILEDWITHC11
+        //如果编译器可以编译C++11
+        //获取当前时间
         std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 #else
         std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
 #endif
 
         // Pass the image to the SLAM system
-        SLAM.TrackMonocular(im,tframe);
+        SLAM.TrackMonocular(im,tframe); //将图片放入SLAM系统中进行追踪
 
 #ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -90,25 +94,28 @@ int main(int argc, char **argv)
         std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
 #endif
 
+        // 计算追踪该图片所花的时间
         double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
 
         vTimesTrack[ni]=ttrack;
 
         // Wait to load the next frame
         double T=0;
-        if(ni<nImages-1)
-            T = vTimestamps[ni+1]-tframe;
-        else if(ni>0)
+        if(ni<nImages-1)  // 如果不是最后一帧图像
+            T = vTimestamps[ni+1]-tframe; //计算下一帧图片的时间戳与当前图片时间戳的差值T，
+        else if(ni>0) // 如果是最后一帧图像，计算当前帧时间戳与前一帧时间戳的差值
             T = tframe-vTimestamps[ni-1];
 
-        if(ttrack<T)
+        if(ttrack<T) // 主要是模拟时间情况，因为追踪结束以后下一帧可能还没来，需要等到下一帧到来再执行程序
             usleep((T-ttrack)*1e6);
     }
 
     // Stop all threads
-    SLAM.Shutdown();
+    SLAM.Shutdown(); //追踪完所有图片序列以后，关掉当前的线程
 
     // Tracking time statistics
+    // 对追踪部分进行统计
+    // 计算中位数、总数和平均值
     sort(vTimesTrack.begin(),vTimesTrack.end());
     float totaltime = 0;
     for(int ni=0; ni<nImages; ni++)
@@ -120,7 +127,7 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt"); //保存整个相机位姿轨迹
 
     return 0;
 }

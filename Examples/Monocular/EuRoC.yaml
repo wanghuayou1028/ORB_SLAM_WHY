@@ -15,7 +15,7 @@ Camera.k2: 0.07395907
 Camera.p1: 0.00019359
 Camera.p2: 1.76187114e-05
 
-# Camera frames per second 
+# Camera frames per second 这个参数用在tracking过程中和Viewer.cc中显示图像等待时间
 Camera.fps: 20.0
 
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)

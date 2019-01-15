@@ -16,6 +16,7 @@ Camera.p1: -0.005358
 Camera.p2: 0.002628
 Camera.k3: 1.163314
 
+# 这两个变量会传入到Viewer中，但是程序中没有用到
 Camera.width: 640
 Camera.height: 480
 
