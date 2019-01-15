@@ -33,7 +33,7 @@ void Map::AddKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexMap);
     mspKeyFrames.insert(pKF);
-    if(pKF->mnId>mnMaxKFid)
+    if(pKF->mnId>mnMaxKFid) //判断是否大于最大ID
         mnMaxKFid=pKF->mnId;
 }
 
@@ -59,6 +59,7 @@ void Map::EraseKeyFrame(KeyFrame *pKF)
 
     // TODO: This only erase the pointer.
     // Delete the MapPoint
+    // 还应该判断ID,如果这个ID对应的是最大ID,则需要对最大ID进行修改
 }
 
 void Map::SetReferenceMapPoints(const vector<MapPoint *> &vpMPs)
