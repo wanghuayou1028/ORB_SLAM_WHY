@@ -171,7 +171,7 @@ private:
 
     // Tracking state
     int mTrackingState;
-    std::vector<MapPoint*> mTrackedMapPoints;
+    std::vector<MapPoint*> mTrackedMapPoints; // 与当前帧特征点对应的地图点
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
 };

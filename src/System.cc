@@ -61,7 +61,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Load ORB Vocabulary
     cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
-    mpVocabulary = new ORBVocabulary();
+    mpVocabulary = new ORBVocabulary();  // 创建ORB词袋对象
     bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
     if(!bVocLoad)
     {
@@ -159,7 +159,7 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
 
     unique_lock<mutex> lock2(mMutexState);
     mTrackingState = mpTracker->mState;
-    mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
+    mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints; // 和当前帧中关键点相关联的地图点
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
     return Tcw;
 }
@@ -226,6 +226,7 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
     // Check mode change
     {
         unique_lock<mutex> lock(mMutexMode);
+        // 如果mbActivateLocalizationMode为ture，首先停止局部建图，并且通知追踪线程进入定位模式
         if(mbActivateLocalizationMode)
         {
             mpLocalMapper->RequestStop();
@@ -239,6 +240,7 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
             mpTracker->InformOnlyTracking(true);
             mbActivateLocalizationMode = false;
         }
+        // 如果mbDeactivateLocalizationMode为true，则通知mpTracker停止定位模式，并释放局部建图线程
         if(mbDeactivateLocalizationMode)
         {
             mpTracker->InformOnlyTracking(false);
@@ -279,6 +281,7 @@ void System::DeactivateLocalizationMode()
     mbDeactivateLocalizationMode = true;
 }
 
+// 地图大改变，指的是进行了闭环检测和全局BA
 bool System::MapChanged()
 {
     static int n=0;
@@ -332,12 +335,13 @@ void System::SaveTrajectoryTUM(const string &filename)
         return;
     }
 
+    // 获取地图中的所有关键帧，并对关键帧按照Id进行排序
     vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
-    sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
+    sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId); //　对关键帧进行排序，最后一项是排序需要满足的条件，这是标准模板库中sort函数的固定用法
 
     // Transform all keyframes so that the first keyframe is at the origin.
     // After a loop closure the first keyframe might not be at the origin.
-    cv::Mat Two = vpKFs[0]->GetPoseInverse();
+    cv::Mat Two = vpKFs[0]->GetPoseInverse(); // 获取位姿的逆，即起始关键帧在世界坐标系下的位姿,这是对第一个关键帧进行处理
 
     ofstream f;
     f.open(filename.c_str());
@@ -355,28 +359,30 @@ void System::SaveTrajectoryTUM(const string &filename)
     for(list<cv::Mat>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
         lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
     {
-        if(*lbL)
+        if(*lbL) // Frames that are not localized (tracking failure) are not saved
             continue;
 
-        KeyFrame* pKF = *lRit;
+        KeyFrame* pKF = *lRit; // 参考关键帧
 
-        cv::Mat Trw = cv::Mat::eye(4,4,CV_32F);
+        cv::Mat Trw = cv::Mat::eye(4,4,CV_32F); // a 4 by 4 identical matrix
 
         // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
         while(pKF->isBad())
         {
-            Trw = Trw*pKF->mTcp;
+            Trw = Trw*pKF->mTcp; // 得到parent相对于该关键帧的位姿
             pKF = pKF->GetParent();
         }
 
-        Trw = Trw*pKF->GetPose()*Two;
+        // 初步分析得出的结果应该是当前关键帧相机相对于起始关键帧相机的位姿
+        Trw = Trw*pKF->GetPose()*Two; // pKF->GetPose()是关键帧相机相对于世界坐标系的位姿
 
-        cv::Mat Tcw = (*lit)*Trw;
+        cv::Mat Tcw = (*lit)*Trw; // 当前帧的相机位置相对于第一个关键帧相机坐标系的位姿
         cv::Mat Rwc = Tcw.rowRange(0,3).colRange(0,3).t();
-        cv::Mat twc = -Rwc*Tcw.rowRange(0,3).col(3);
+        cv::Mat twc = -Rwc*Tcw.rowRange(0,3).col(3); // 这是在求平移变换的时候直接转换的平移的参考坐标系
 
         vector<float> q = Converter::toQuaternion(Rwc);
 
+        // setprecision用来控制保留几位小数
         f << setprecision(6) << *lT << " " <<  setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
     }
     f.close();
