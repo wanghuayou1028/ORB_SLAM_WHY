@@ -48,8 +48,8 @@ public:
     cv::Mat GetNormal();
     KeyFrame* GetReferenceKeyFrame();
 
-    std::map<KeyFrame*,size_t> GetObservations();
-    int Observations();
+    std::map<KeyFrame*,size_t> GetObservations(); //获取观测到该地图点的关键帧和对应地图点在关键帧中的编号
+    int Observations(); //返回能够观测到该地图点的关键帧的数量
 
     void AddObservation(KeyFrame* pKF,size_t idx);
     void EraseObservation(KeyFrame* pKF);
@@ -60,7 +60,7 @@ public:
     void SetBadFlag();
     bool isBad();
 
-    void Replace(MapPoint* pMP);    
+    void Replace(MapPoint* pMP); // 在形成闭环的时候，会更新KeyFrame与MapPoint之间的关系      
     MapPoint* GetReplaced();
 
     void IncreaseVisible(int n=1);
@@ -82,19 +82,24 @@ public:
     int PredictScale(const float &currentDist, Frame* pF);
 
 public:
-    long unsigned int mnId;
+    long unsigned int mnId; //地图点的ID,从０开始逐渐增加
     static long unsigned int nNextId;
-    long int mnFirstKFid;
-    long int mnFirstFrame;
-    int nObs;
+    long int mnFirstKFid; //创建该MapPoint的关键帧ID
+    long int mnFirstFrame; //创建该MapPoint的帧ID（即每一关键帧有一个帧ID）
+    int nObs; //能够观测到该地图点的关键帧数量
 
     // Variables used by the tracking
-    float mTrackProjX;
+    float mTrackProjX; // 三个投影像素坐标
     float mTrackProjY;
     float mTrackProjXR;
-    bool mbTrackInView;
-    int mnTrackScaleLevel;
-    float mTrackViewCos;
+    bool mbTrackInView;  // 是否该地图点在当前帧中可视
+    int mnTrackScaleLevel; // 追踪的尺度因子
+    float mTrackViewCos; // 地图点与相机光心的连线与 相机成像平面垂直的直线之间的夹角
+    // TrackLocalMap - SearchByProjection中决定是否对该点进行投影的变量
+    // mbTrackInView==false的点有几种：
+    // a 已经和当前帧经过匹配（TrackReferenceKeyFrame，TrackWithMotionModel）但在优化过程中认为是外点
+    // b 已经和当前帧经过匹配且为内点，这类点也不需要再进行投影
+    // c 不在当前相机视野中的点（即未通过isInFrustum判断）
     long unsigned int mnTrackReferenceForFrame;
     long unsigned int mnLastFrameSeen;
 
@@ -118,28 +123,29 @@ protected:
      cv::Mat mWorldPos;
 
      // Keyframes observing the point and associated index in keyframe
+     // 存放已经观测到该地图点的关键帧和对应的特征点编号
      std::map<KeyFrame*,size_t> mObservations;
 
      // Mean viewing direction
-     cv::Mat mNormalVector;
+     cv::Mat mNormalVector; // 这个地图点的视角方向
 
      // Best descriptor to fast matching
      cv::Mat mDescriptor;
 
      // Reference KeyFrame
-     KeyFrame* mpRefKF;
+     KeyFrame* mpRefKF; // 参考关键帧
 
      // Tracking counters
-     int mnVisible;
-     int mnFound;
+     int mnVisible; // 可看到该地图点的关键帧数量
+     int mnFound; // 实际追踪该地图点的关键帧数量
 
      // Bad flag (we do not currently erase MapPoint from memory)
      bool mbBad;
      MapPoint* mpReplaced;
 
      // Scale invariance distances
-     float mfMinDistance;
-     float mfMaxDistance;
+     float mfMinDistance; // 观测到该点的距离上限
+     float mfMaxDistance; // 观测到该点的距离下限
 
      Map* mpMap;
 
