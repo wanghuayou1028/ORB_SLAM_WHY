@@ -50,6 +50,16 @@ class LocalMapping;
 class LoopClosing;
 class System;
 
+// 程序中变量名的第一个字母如果为"m"则表示为类中的成员变量，member
+// 第一个、第二个字母:
+// "p"表示指针数据类型
+// "n"表示int类型
+// "b"表示bool类型
+// "s"表示set类型
+// "v"表示vector数据类型
+// 'l'表示list数据类型
+// "KF"表示KeyPoint数据类型
+
 class Tracking
 {  
 
@@ -87,31 +97,32 @@ public:
     };
 
     eTrackingState mState;
-    eTrackingState mLastProcessedState;
+    eTrackingState mLastProcessedState; // 上一次处理的Tracking状态
 
     // Input sensor
     int mSensor;
 
     // Current Frame
-    Frame mCurrentFrame;
-    cv::Mat mImGray;
+    Frame mCurrentFrame; //当前帧
+    cv::Mat mImGray; //当前灰度图像
 
     // Initialization Variables (Monocular)
-    std::vector<int> mvIniLastMatches;
-    std::vector<int> mvIniMatches;
-    std::vector<cv::Point2f> mvbPrevMatched;
-    std::vector<cv::Point3f> mvIniP3D;
-    Frame mInitialFrame;
+    // 初始化时前两帧相关变量
+    std::vector<int> mvIniLastMatches; //没有用到
+    std::vector<int> mvIniMatches; //跟踪初始化时前两帧之间的匹配
+    std::vector<cv::Point2f> mvbPrevMatched; //上一帧与之前图像帧匹配的特征点
+    std::vector<cv::Point3f> mvIniP3D; //初始化生成的地图点的三维坐标
+    Frame mInitialFrame; //代表第一帧图像
 
     // Lists used to recover the full camera trajectory at the end of the execution.
     // Basically we store the reference keyframe for each frame and its relative transformation
-    list<cv::Mat> mlRelativeFramePoses;
-    list<KeyFrame*> mlpReferences;
-    list<double> mlFrameTimes;
-    list<bool> mlbLost;
+    list<cv::Mat> mlRelativeFramePoses; // 存放的是每个图像帧相对于其参考关键帧的位姿，之所以这样保存是因为关键帧的位姿后面还会进行优化；
+    list<KeyFrame*> mlpReferences; // 存放每个图像帧的参考关键帧
+    list<double> mlFrameTimes; // 存放每一帧的时间戳
+    list<bool> mlbLost; // 存放每一帧是否lost
 
     // True if local mapping is deactivated and we are performing only localization
-    bool mbOnlyTracking;
+    bool mbOnlyTracking; // 取消局部地图构建，只进行定位标志位
 
     void Reset();
 
@@ -155,6 +166,10 @@ protected:
     LoopClosing* mpLoopClosing;
 
     //ORB
+    // orb特征提取器，不管单目还是双目，mpORBextractorLeft都要用到
+    // 如果是双目，则要用到mpORBextractorRight
+    // 如果是单目，在初始化的时候使用mpIniORBextractor而不是mpORBextractorLeft，
+    // mpIniORBextractor属性中提取的特征点个数是mpORBextractorLeft的两倍
     ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
     ORBextractor* mpIniORBextractor;
 
@@ -166,9 +181,9 @@ protected:
     Initializer* mpInitializer;
 
     //Local Map
-    KeyFrame* mpReferenceKF;
-    std::vector<KeyFrame*> mvpLocalKeyFrames;
-    std::vector<MapPoint*> mvpLocalMapPoints;
+    KeyFrame* mpReferenceKF; // 当前关键帧的参考关键帧
+    std::vector<KeyFrame*> mvpLocalKeyFrames; // 当前帧的局部关键帧
+    std::vector<MapPoint*> mvpLocalMapPoints; // 当前帧的局部地图点
     
     // System
     System* mpSystem;
@@ -183,12 +198,12 @@ protected:
 
     //Calibration matrix
     cv::Mat mK;
-    cv::Mat mDistCoef;
+    cv::Mat mDistCoef; // 扭曲参数
     float mbf;
 
     //New KeyFrame rules (according to fps)
     int mMinFrames;
-    int mMaxFrames;
+    int mMaxFrames; //重定位之后这些帧才有可能插入关键帧
 
     // Threshold close/far points
     // Points seen as close by the stereo/RGBD sensor are considered reliable
@@ -196,10 +211,10 @@ protected:
     float mThDepth;
 
     // For RGB-D inputs only. For some datasets (e.g. TUM) the depthmap values are scaled.
-    float mDepthMapFactor;
+    float mDepthMapFactor; // 判断一个3D点远/近的阈值 mbf * 35 / fx
 
     //Current matches in frame
-    int mnMatchesInliers;
+    int mnMatchesInliers;  // 当前帧的匹配数量，一般用来判断追踪效果
 
     //Last Frame, KeyFrame and Relocalisation Info
     KeyFrame* mpLastKeyFrame;
@@ -213,7 +228,7 @@ protected:
     //Color order (true RGB, false BGR, ignored if grayscale)
     bool mbRGB;
 
-    list<MapPoint*> mlpTemporalPoints;
+    list<MapPoint*> mlpTemporalPoints; // 恒速运动模型追踪时，针对双目和RGB-D相机临时生成的一些地图点
 };
 
 } //namespace ORB_SLAM
