@@ -17,7 +17,7 @@ namespace ORB_SLAM2 {
 
 
     bool SystemSetting::LoadSystemSetting(const std::string strSettingPath){
-        cout<<endl<<"Loading System Parameters form:"<<strSettingPath<<endl;
+        cout<<endl<<"SystemSetting class Loading System Parameters from: "<<strSettingPath<<endl;
         cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
         width  = fSettings["Camera.width"];
         height = fSettings["Camera.height"];

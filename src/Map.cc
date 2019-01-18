@@ -189,13 +189,20 @@ void Map::Load (const string &filename, SystemSetting* mySystemSetting)
     unsigned long int nMapPoints;
     f.read((char*)&nMapPoints, sizeof(nMapPoints));
 
+    // store the biggest id of MapPoint
+    unsigned long int biggestIdOfMapPoint = 0;
     //依次读取每一个MapPoints，并将其加入到地图中
     cerr<<"The number of MapPoints:"<<nMapPoints<<endl;
     for ( unsigned int i = 0; i < nMapPoints; i ++ )
     {
         MapPoint* mp = LoadMapPoint(f);
+        if( mp->mnId > biggestIdOfMapPoint )
+            biggestIdOfMapPoint = mp->mnId;
         AddMapPoint(mp);
     }
+    // set nNextId of MapPoint class
+    MapPoint::nNextId = biggestIdOfMapPoint;
+    std::cout << std::endl << "nNextId of MapPoint is: " << MapPoint::nNextId << std::endl;
 
     //获取所有的MapPoints；
     std::vector<MapPoint*> vmp = GetAllMapPoints();
@@ -207,12 +214,19 @@ void Map::Load (const string &filename, SystemSetting* mySystemSetting)
 
     //依次读取每一关键帧，并加入到地图；
     vector<KeyFrame*>kf_by_order;
+    // store the biggest id of Keyframe
+    long unsigned int biggestIdOfKeyFrame = 0;
     for( unsigned int i = 0; i < nKeyFrames; i ++ )
     {
         KeyFrame* kf = LoadKeyFrame(f, mySystemSetting);
         AddKeyFrame(kf);
+        if( kf->mnId > biggestIdOfKeyFrame )
+            biggestIdOfKeyFrame = kf->mnId;
         kf_by_order.push_back(kf);
     }
+    // set nNextId of KeyFrame class
+    KeyFrame::nNextId = biggestIdOfKeyFrame;
+    std::cout << std::endl << "nNextId of KeyFrame is: " << KeyFrame::nNextId << std::endl;
 
     cerr<<"KeyFrame Load OVER!"<<endl;
     //读取生长树；
